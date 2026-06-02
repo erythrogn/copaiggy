@@ -882,29 +882,37 @@ body {
         </section>
     </main>
 </div>
-<script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-analytics.js";
+import { getFirestore, doc, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyAGdn9lHp48Ii6HNSoohLPXjkzD5qmrdQI",
+    authDomain: "copaiggy.firebaseapp.com",
+    projectId: "copaiggy",
+    storageBucket: "copaiggy.firebasestorage.app",
+    messagingSenderId: "830780345547",
+    appId: "1:830780345547:web:898750fc2f178181db1f4e",
+    measurementId: "G-Z4897BGBSX"
+};
+
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+const db = getFirestore(app);
+const docRef = doc(db, "partidas", "estado_global");
+
 class Vector2D {
-    constructor(x, y) {
-        this.x = x;
-        this.y = y;
-    }
-    add(vector) {
-        this.x += vector.x;
-        this.y += vector.y;
-    }
-    multiply(scalar) {
-        this.x *= scalar;
-        this.y *= scalar;
-    }
+    constructor(x, y) { this.x = x; this.y = y; }
+    add(vector) { this.x += vector.x; this.y += vector.y; }
+    multiply(scalar) { this.x *= scalar; this.y *= scalar; }
 }
+
 class ConfettiParticle {
     constructor(x, y, context) {
         this.context = context;
         this.position = new Vector2D(x, y);
-        this.velocity = new Vector2D(
-            (Math.random() - 0.5) * 20,
-            (Math.random() - 1) * 25
-        );
+        this.velocity = new Vector2D((Math.random() - 0.5) * 20, (Math.random() - 1) * 25);
         this.gravity = new Vector2D(0, 0.5);
         this.friction = 0.98;
         this.size = Math.random() * 8 + 6;
@@ -931,10 +939,9 @@ class ConfettiParticle {
         this.context.fillRect(-this.size / 2, -this.size / 2, this.size, this.size);
         this.context.restore();
     }
-    isDead() {
-        return this.opacity <= 0 || this.position.y > window.innerHeight;
-    }
+    isDead() { return this.opacity <= 0 || this.position.y > window.innerHeight; }
 }
+
 class ConfettiEngine {
     constructor(canvasId) {
         this.canvas = document.getElementById(canvasId);
@@ -950,67 +957,72 @@ class ConfettiEngine {
         this.canvas.height = window.innerHeight;
     }
     burst(x, y, count = 60) {
-        for (let i = 0; i < count; i++) {
-            this.particles.push(new ConfettiParticle(x, y, this.context));
-        }
-        if (!this.isRunning) {
-            this.isRunning = true;
-            this.loop();
-        }
+        for (let i = 0; i < count; i++) this.particles.push(new ConfettiParticle(x, y, this.context));
+        if (!this.isRunning) { this.isRunning = true; this.loop(); }
     }
     loop() {
         this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
         for (let i = this.particles.length - 1; i >= 0; i--) {
             const p = this.particles[i];
-            p.update();
-            p.draw();
-            if (p.isDead()) {
-                this.particles.splice(i, 1);
-            }
+            p.update(); p.draw();
+            if (p.isDead()) this.particles.splice(i, 1);
         }
-        if (this.particles.length > 0) {
-            requestAnimationFrame(this.loop.bind(this));
-        } else {
-            this.isRunning = false;
-            this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        }
+        if (this.particles.length > 0) requestAnimationFrame(this.loop.bind(this));
+        else { this.isRunning = false; this.context.clearRect(0, 0, this.canvas.width, this.canvas.height); }
     }
 }
+
 class AppState {
     constructor() {
-        this.state = {
-            teamA: 'Time Verde',
-            teamB: 'Time Azul',
-            players: [],
-            logs: []
-        };
+        this.state = { teamA: 'Time Verde', teamB: 'Time Azul', players: [], logs: [] };
         this.listeners = [];
+        this.initSync();
     }
-    subscribe(listener) {
-        this.listeners.push(listener);
+    
+    initSync() {
+        onSnapshot(docRef, (docSnap) => {
+            if (docSnap.exists()) {
+                this.state = docSnap.data();
+                this.notify('REMOTE_SYNC', null);
+            } else {
+                this.pushToRemote();
+            }
+        });
     }
-    notify(event, data) {
-        this.listeners.forEach(listener => listener(event, data, this.state));
+
+    async pushToRemote() {
+        try { await setDoc(docRef, this.state); } 
+        catch (error) { console.error("Erro ao sincronizar com Firebase:", error); }
     }
+
+    subscribe(listener) { this.listeners.push(listener); }
+    notify(event, data) { this.listeners.forEach(listener => listener(event, data, this.state)); }
+
     updateTeamName(team, name) {
         if (team === 'a') this.state.teamA = name;
         if (team === 'b') this.state.teamB = name;
         this.notify('TEAM_UPDATED', { team, name });
+        this.pushToRemote();
     }
+
     addPlayer(name, team) {
         const id = 'player_' + Date.now().toString(36) + Math.random().toString(36).substr(2);
         const newPlayer = { id, name, team, score: 0 };
         this.state.players.push(newPlayer);
         this.notify('PLAYER_ADDED', newPlayer);
+        this.pushToRemote();
     }
+
     removePlayer(id) {
         const index = this.state.players.findIndex(p => p.id === id);
         if (index !== -1) {
             const player = this.state.players[index];
             this.state.players.splice(index, 1);
             this.notify('PLAYER_REMOVED', player);
+            this.pushToRemote();
         }
     }
+
     incrementScore(id) {
         const player = this.state.players.find(p => p.id === id);
         if (player) {
@@ -1023,8 +1035,10 @@ class AppState {
             };
             this.state.logs.unshift(logEntry);
             this.notify('SCORE_INCREMENTED', { player, logEntry });
+            this.pushToRemote();
         }
     }
+
     decrementScore(id) {
         const player = this.state.players.find(p => p.id === id);
         if (player && player.score > 0) {
@@ -1036,14 +1050,18 @@ class AppState {
                 this.state.logs.splice(logIndex, 1);
             }
             this.notify('SCORE_DECREMENTED', { player, removedLog });
+            this.pushToRemote();
         }
     }
+
     resetAll() {
         this.state.players.forEach(p => p.score = 0);
         this.state.logs = [];
         this.notify('ALL_RESET', null);
+        this.pushToRemote();
     }
 }
+
 class UIManager {
     constructor(stateManager, confettiEngine) {
         this.stateManager = stateManager;
@@ -1077,16 +1095,12 @@ class UIManager {
         this.stateManager.subscribe(this.handleStateChange.bind(this));
         this.renderEmptyStates();
     }
+
     bindEvents() {
-        this.elements.tabs.forEach(tab => {
-            tab.addEventListener('click', (e) => this.switchTab(e.currentTarget));
-        });
-        this.elements.inputTeamA.addEventListener('input', (e) => {
-            this.stateManager.updateTeamName('a', e.target.value || 'Equipe A');
-        });
-        this.elements.inputTeamB.addEventListener('input', (e) => {
-            this.stateManager.updateTeamName('b', e.target.value || 'Equipe B');
-        });
+        this.elements.tabs.forEach(tab => tab.addEventListener('click', (e) => this.switchTab(e.currentTarget)));
+        this.elements.inputTeamA.addEventListener('input', (e) => this.stateManager.updateTeamName('a', e.target.value || 'Equipe A'));
+        this.elements.inputTeamB.addEventListener('input', (e) => this.stateManager.updateTeamName('b', e.target.value || 'Equipe B'));
+        
         const addHandler = () => {
             const name = this.elements.inputPlayerName.value.trim();
             const team = this.elements.selectPlayerTeam.value;
@@ -1098,22 +1112,23 @@ class UIManager {
                 this.showToast('Informe o nome do jogador.', 'danger');
             }
         };
+        
         this.elements.btnAddPlayer.addEventListener('click', addHandler);
-        this.elements.inputPlayerName.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') addHandler();
-        });
+        this.elements.inputPlayerName.addEventListener('keypress', (e) => { if (e.key === 'Enter') addHandler(); });
         this.elements.btnResetAll.addEventListener('click', () => {
-            this.showModal(
-                'Atenção Crítica',
-                'Tem certeza que deseja zerar completamente o placar e histórico? Esta ação é irreversível.',
-                () => {
-                    this.stateManager.resetAll();
-                    this.showToast('Placar reiniciado com sucesso.', 'success');
-                }
-            );
+            this.showModal('Atenção Crítica', 'Tem certeza que deseja zerar completamente o placar e histórico? Esta ação é irreversível.', () => {
+                this.stateManager.resetAll();
+                this.showToast('Placar reiniciado com sucesso.', 'success');
+            });
         });
     }
+
     handleStateChange(event, data, state) {
+        if (event === 'REMOTE_SYNC') {
+            this.fullRender(state);
+            return;
+        }
+
         switch (event) {
             case 'TEAM_UPDATED':
                 this.syncTeamNames(state);
@@ -1149,6 +1164,25 @@ class UIManager {
                 break;
         }
     }
+
+    fullRender(state) {
+        this.elements.listAdmin.innerHTML = '';
+        this.elements.listScoreA.innerHTML = '';
+        this.elements.listScoreB.innerHTML = '';
+        this.elements.logList.innerHTML = '';
+        this.elements.inputTeamA.value = state.teamA;
+        this.elements.inputTeamB.value = state.teamB;
+        
+        this.syncTeamNames(state);
+        state.players.forEach(p => {
+            this.renderPlayerAdmin(p, state);
+            this.renderPlayerScoreRow(p);
+        });
+        state.logs.forEach(l => this.renderLogEntry(l, state, false));
+        this.updateScoreboards(state);
+        this.checkEmptyStates(state);
+    }
+
     switchTab(targetTab) {
         const targetId = targetTab.getAttribute('data-target');
         if (targetTab.classList.contains('active')) return;
@@ -1157,19 +1191,15 @@ class UIManager {
         const currentView = document.querySelector('.view-container.active');
         const nextView = document.getElementById(targetId);
         gsap.to(currentView, {
-            opacity: 0,
-            y: -10,
-            duration: 0.2,
+            opacity: 0, y: -10, duration: 0.2,
             onComplete: () => {
                 currentView.classList.remove('active');
                 nextView.classList.add('active');
-                gsap.fromTo(nextView, 
-                    { opacity: 0, y: 10 }, 
-                    { opacity: 1, y: 0, duration: 0.3, ease: 'power2.out' }
-                );
+                gsap.fromTo(nextView, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.3, ease: 'power2.out' });
             }
         });
     }
+
     syncTeamNames(state) {
         this.elements.displayTeamAName.textContent = state.teamA;
         this.elements.displayTeamBName.textContent = state.teamB;
@@ -1178,127 +1208,93 @@ class UIManager {
         this.elements.selectTeamA.textContent = state.teamA;
         this.elements.selectTeamB.textContent = state.teamB;
     }
+
     updateTagsInDOM(state) {
         document.querySelectorAll('.tag.team-a').forEach(el => el.textContent = state.teamA);
         document.querySelectorAll('.tag.team-b').forEach(el => el.textContent = state.teamB);
         document.querySelectorAll('.log-time.team-a').forEach(el => el.textContent = state.teamA);
         document.querySelectorAll('.log-time.team-b').forEach(el => el.textContent = state.teamB);
     }
+
     createElement(tag, classNames = [], attributes = {}) {
         const el = document.createElement(tag);
         if (classNames.length) el.classList.add(...classNames);
-        for (const [key, value] of Object.entries(attributes)) {
-            el.setAttribute(key, value);
-        }
+        for (const [key, value] of Object.entries(attributes)) el.setAttribute(key, value);
         return el;
     }
+
     createSVGIcon(type) {
         const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-        svg.setAttribute('width', '16');
-        svg.setAttribute('height', '16');
-        svg.setAttribute('viewBox', '0 0 24 24');
-        svg.setAttribute('fill', 'none');
-        svg.setAttribute('stroke', 'currentColor');
-        svg.setAttribute('stroke-width', '2.5');
-        svg.setAttribute('stroke-linecap', 'round');
-        svg.setAttribute('stroke-linejoin', 'round');
+        svg.setAttribute('width', '16'); svg.setAttribute('height', '16');
+        svg.setAttribute('viewBox', '0 0 24 24'); svg.setAttribute('fill', 'none');
+        svg.setAttribute('stroke', 'currentColor'); svg.setAttribute('stroke-width', '2.5');
+        svg.setAttribute('stroke-linecap', 'round'); svg.setAttribute('stroke-linejoin', 'round');
         if (type === 'user') {
-            const path1 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-            path1.setAttribute('d', 'M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2');
-            const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-            circle.setAttribute('cx', '12');
-            circle.setAttribute('cy', '7');
-            circle.setAttribute('r', '4');
-            svg.appendChild(path1);
-            svg.appendChild(circle);
+            const p1 = document.createElementNS('http://www.w3.org/2000/svg', 'path'); p1.setAttribute('d', 'M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2');
+            const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle'); c.setAttribute('cx', '12'); c.setAttribute('cy', '7'); c.setAttribute('r', '4');
+            svg.appendChild(p1); svg.appendChild(c);
         } else if (type === 'trash') {
-            const p1 = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
-            p1.setAttribute('points', '3 6 5 6 21 6');
-            const p2 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-            p2.setAttribute('d', 'M19 6l-1 14H6L5 6');
-            const p3 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-            p3.setAttribute('d', 'M10 11v6');
-            const p4 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-            p4.setAttribute('d', 'M14 11v6');
-            const p5 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-            p5.setAttribute('d', 'M9 6V4h6v2');
-            svg.appendChild(p1); svg.appendChild(p2); svg.appendChild(p3); svg.appendChild(p4); svg.appendChild(p5);
+            const p1 = document.createElementNS('http://www.w3.org/2000/svg', 'polyline'); p1.setAttribute('points', '3 6 5 6 21 6');
+            const p2 = document.createElementNS('http://www.w3.org/2000/svg', 'path'); p2.setAttribute('d', 'M19 6l-1 14H6L5 6');
+            const p3 = document.createElementNS('http://www.w3.org/2000/svg', 'path'); p3.setAttribute('d', 'M10 11v6');
+            const p4 = document.createElementNS('http://www.w3.org/2000/svg', 'path'); p4.setAttribute('d', 'M14 11v6');
+            const p5 = document.createElementNS('http://www.w3.org/2000/svg', 'path'); p5.setAttribute('d', 'M9 6V4h6v2');
+            svg.append(p1, p2, p3, p4, p5);
         } else if (type === 'plus') {
-            const p1 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-            p1.setAttribute('x1', '12'); p1.setAttribute('y1', '5'); p1.setAttribute('x2', '12'); p1.setAttribute('y2', '19');
-            const p2 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-            p2.setAttribute('x1', '5'); p2.setAttribute('y1', '12'); p2.setAttribute('x2', '19'); p2.setAttribute('y2', '12');
-            svg.appendChild(p1); svg.appendChild(p2);
+            const p1 = document.createElementNS('http://www.w3.org/2000/svg', 'line'); p1.setAttribute('x1', '12'); p1.setAttribute('y1', '5'); p1.setAttribute('x2', '12'); p1.setAttribute('y2', '19');
+            const p2 = document.createElementNS('http://www.w3.org/2000/svg', 'line'); p2.setAttribute('x1', '5'); p2.setAttribute('y1', '12'); p2.setAttribute('x2', '19'); p2.setAttribute('y2', '12');
+            svg.append(p1, p2);
         } else if (type === 'minus') {
-            const p1 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-            p1.setAttribute('x1', '5'); p1.setAttribute('y1', '12'); p1.setAttribute('x2', '19'); p1.setAttribute('y2', '12');
+            const p1 = document.createElementNS('http://www.w3.org/2000/svg', 'line'); p1.setAttribute('x1', '5'); p1.setAttribute('y1', '12'); p1.setAttribute('x2', '19'); p1.setAttribute('y2', '12');
             svg.appendChild(p1);
         }
         return svg;
     }
+
     renderPlayerAdmin(player, state) {
+        if (document.getElementById(`admin-${player.id}`)) return;
         const teamName = player.team === 'a' ? state.teamA : state.teamB;
         const item = this.createElement('div', ['list-item'], { id: `admin-${player.id}` });
         const avatar = this.createElement('div', ['avatar', `team-${player.team}`]);
         avatar.appendChild(this.createSVGIcon('user'));
         const info = this.createElement('div', ['item-info']);
-        const nameEl = this.createElement('span', ['item-name']);
-        nameEl.textContent = player.name;
-        const tag = this.createElement('span', ['tag', `team-${player.team}`]);
-        tag.textContent = teamName;
-        info.appendChild(nameEl);
-        info.appendChild(tag);
-        const score = this.createElement('span', ['item-score'], { id: `admin-score-${player.id}` });
-        score.textContent = player.score;
+        const nameEl = this.createElement('span', ['item-name']); nameEl.textContent = player.name;
+        const tag = this.createElement('span', ['tag', `team-${player.team}`]); tag.textContent = teamName;
+        info.append(nameEl, tag);
+        const score = this.createElement('span', ['item-score'], { id: `admin-score-${player.id}` }); score.textContent = player.score;
         const btn = this.createElement('button', ['btn-icon', 'danger'], { title: 'Remover' });
         btn.appendChild(this.createSVGIcon('trash'));
         btn.addEventListener('click', () => {
-            this.showModal('Confirmar Ação', `Remover o jogador ${player.name} permanentemente?`, () => {
-                this.stateManager.removePlayer(player.id);
-            });
+            this.showModal('Confirmar Ação', `Remover o jogador ${player.name} permanentemente?`, () => this.stateManager.removePlayer(player.id));
         });
-        item.appendChild(avatar);
-        item.appendChild(info);
-        item.appendChild(score);
-        item.appendChild(btn);
+        item.append(avatar, info, score, btn);
         this.elements.listAdmin.appendChild(item);
         gsap.from(item, { opacity: 0, x: -20, duration: 0.3, ease: 'power2.out' });
     }
+
     renderPlayerScoreRow(player) {
+        if (document.getElementById(`score-row-${player.id}`)) return;
         const row = this.createElement('div', ['player-score-row'], { id: `score-row-${player.id}` });
-        const nameEl = this.createElement('span', ['psr-name']);
-        nameEl.textContent = player.name;
-        const scoreEl = this.createElement('span', ['psr-score'], { id: `score-val-${player.id}` });
-        scoreEl.textContent = player.score;
-        const btnMinus = this.createElement('button', ['btn-action', 'minus'], { title: 'Remover dose' });
-        btnMinus.appendChild(this.createSVGIcon('minus'));
+        const nameEl = this.createElement('span', ['psr-name']); nameEl.textContent = player.name;
+        const scoreEl = this.createElement('span', ['psr-score'], { id: `score-val-${player.id}` }); scoreEl.textContent = player.score;
+        const btnMinus = this.createElement('button', ['btn-action', 'minus'], { title: 'Remover dose' }); btnMinus.appendChild(this.createSVGIcon('minus'));
         btnMinus.addEventListener('click', () => this.stateManager.decrementScore(player.id));
-        const btnClassType = player.team === 'b' ? 'blue' : '';
-        const btnClasses = btnClassType ? ['btn-action', btnClassType] : ['btn-action'];
-        const btnPlus = this.createElement('button', btnClasses, { title: 'Marcar dose' });
-        btnPlus.appendChild(this.createSVGIcon('plus'));
+        const btnClasses = player.team === 'b' ? ['btn-action', 'blue'] : ['btn-action'];
+        const btnPlus = this.createElement('button', btnClasses, { title: 'Marcar dose' }); btnPlus.appendChild(this.createSVGIcon('plus'));
         btnPlus.addEventListener('click', () => this.stateManager.incrementScore(player.id));
-        row.appendChild(nameEl);
-        row.appendChild(scoreEl);
-        row.appendChild(btnMinus);
-        row.appendChild(btnPlus);
-        if (player.team === 'a') {
-            this.elements.listScoreA.appendChild(row);
-        } else {
-            this.elements.listScoreB.appendChild(row);
-        }
+        row.append(nameEl, scoreEl, btnMinus, btnPlus);
+        if (player.team === 'a') this.elements.listScoreA.appendChild(row);
+        else this.elements.listScoreB.appendChild(row);
         gsap.from(row, { opacity: 0, y: 10, duration: 0.3, ease: 'power1.out' });
     }
+
     removePlayerDOM(id) {
         const adminEl = document.getElementById(`admin-${id}`);
         const scoreEl = document.getElementById(`score-row-${id}`);
-        if (adminEl) {
-            gsap.to(adminEl, { opacity: 0, x: 20, duration: 0.2, onComplete: () => adminEl.remove() });
-        }
-        if (scoreEl) {
-            gsap.to(scoreEl, { opacity: 0, scale: 0.9, duration: 0.2, onComplete: () => scoreEl.remove() });
-        }
+        if (adminEl) gsap.to(adminEl, { opacity: 0, x: 20, duration: 0.2, onComplete: () => adminEl.remove() });
+        if (scoreEl) gsap.to(scoreEl, { opacity: 0, scale: 0.9, duration: 0.2, onComplete: () => scoreEl.remove() });
     }
+
     updatePlayerScoreDOM(player) {
         const adminScore = document.getElementById(`admin-score-${player.id}`);
         const viewScore = document.getElementById(`score-val-${player.id}`);
@@ -1308,60 +1304,47 @@ class UIManager {
             gsap.fromTo(viewScore, { scale: 1.5, color: '#fff' }, { scale: 1, color: 'var(--color-accent)', duration: 0.4 });
         }
     }
+
     updateScoreboards(state) {
-        let scoreA = 0;
-        let scoreB = 0;
-        state.players.forEach(p => {
-            if (p.team === 'a') scoreA += p.score;
-            if (p.team === 'b') scoreB += p.score;
-        });
-        const currentA = parseInt(this.elements.displayScoreA.textContent);
-        const currentB = parseInt(this.elements.displayScoreB.textContent);
-        if (currentA !== scoreA) {
-            this.elements.displayScoreA.textContent = scoreA;
-        }
-        if (currentB !== scoreB) {
-            this.elements.displayScoreB.textContent = scoreB;
-        }
+        let scoreA = 0, scoreB = 0;
+        state.players.forEach(p => { if (p.team === 'a') scoreA += p.score; if (p.team === 'b') scoreB += p.score; });
+        if (parseInt(this.elements.displayScoreA.textContent) !== scoreA) this.elements.displayScoreA.textContent = scoreA;
+        if (parseInt(this.elements.displayScoreB.textContent) !== scoreB) this.elements.displayScoreB.textContent = scoreB;
         this.elements.displayScoreA.classList.remove('leader');
         this.elements.displayScoreB.classList.remove('leader');
         if (scoreA > scoreB) this.elements.displayScoreA.classList.add('leader');
         if (scoreB > scoreA) this.elements.displayScoreB.classList.add('leader');
         this.elements.displayTotal.textContent = scoreA + scoreB;
     }
+
     animateScorePulse(team) {
         const el = team === 'a' ? this.elements.displayScoreA : this.elements.displayScoreB;
-        gsap.timeline()
-            .to(el, { scale: 1.2, duration: 0.1, ease: 'power2.out' })
-            .to(el, { scale: 1, duration: 0.3, ease: 'bounce.out' });
+        gsap.timeline().to(el, { scale: 1.2, duration: 0.1, ease: 'power2.out' }).to(el, { scale: 1, duration: 0.3, ease: 'bounce.out' });
     }
+
     triggerConfetti() {
         const rect = document.querySelector('.score-divider').getBoundingClientRect();
         this.confetti.burst(rect.left + rect.width / 2, rect.top);
     }
-    renderLogEntry(logEntry, state) {
+
+    renderLogEntry(logEntry, state, animate = true) {
+        if (document.getElementById(logEntry.id)) return;
         const teamName = logEntry.team === 'a' ? state.teamA : state.teamB;
-        const index = state.logs.length;
         const entry = this.createElement('div', ['log-entry'], { id: logEntry.id });
         const seq = this.createElement('span', ['log-seq']);
-        seq.textContent = index;
-        const name = this.createElement('span', ['log-name']);
-        name.textContent = logEntry.playerName;
-        const tag = this.createElement('span', ['tag', `team-${logEntry.team}`, 'log-time']);
-        tag.textContent = teamName;
-        const time = this.createElement('span', ['log-time']);
-        time.textContent = logEntry.time;
-        entry.appendChild(seq);
-        entry.appendChild(name);
-        entry.appendChild(tag);
-        entry.appendChild(time);
-        if (this.elements.logList.querySelector('.empty-state')) {
-            this.elements.logList.innerHTML = '';
-        }
-        this.elements.logList.insertBefore(entry, this.elements.logList.firstChild);
-        gsap.from(entry, { opacity: 0, height: 0, padding: 0, duration: 0.3, ease: 'power2.out' });
+        const name = this.createElement('span', ['log-name']); name.textContent = logEntry.playerName;
+        const tag = this.createElement('span', ['tag', `team-${logEntry.team}`, 'log-time']); tag.textContent = teamName;
+        const time = this.createElement('span', ['log-time']); time.textContent = logEntry.time;
+        entry.append(seq, name, tag, time);
+        
+        const emptyState = this.elements.logList.querySelector('.empty-state');
+        if (emptyState) emptyState.remove();
+        
+        this.elements.logList.appendChild(entry);
+        if (animate) gsap.from(entry, { opacity: 0, height: 0, padding: 0, duration: 0.3, ease: 'power2.out' });
         this.renumberLogs();
     }
+
     removeLogEntryDOM(id) {
         if (!id) return;
         const entry = document.getElementById(id);
@@ -1369,20 +1352,22 @@ class UIManager {
             gsap.to(entry, { opacity: 0, height: 0, padding: 0, duration: 0.2, onComplete: () => {
                 entry.remove();
                 this.renumberLogs();
-                if (this.elements.logList.children.length === 0) {
-                    this.renderEmptyState(this.elements.logList, 'Nenhum registro de ocorrência.');
-                }
+                if (this.elements.logList.children.length === 0) this.renderEmptyState(this.elements.logList, 'Nenhum registro de ocorrência.');
             }});
         }
     }
+
     renumberLogs() {
-        const entries = this.elements.logList.querySelectorAll('.log-entry');
-        const total = entries.length;
+        const entries = Array.from(this.elements.logList.querySelectorAll('.log-entry'));
+        entries.sort((a, b) => b.id.localeCompare(a.id)); 
+        this.elements.logList.innerHTML = '';
         entries.forEach((entry, index) => {
             const seqEl = entry.querySelector('.log-seq');
-            if (seqEl) seqEl.textContent = total - index;
+            if (seqEl) seqEl.textContent = entries.length - index;
+            this.elements.logList.appendChild(entry);
         });
     }
+
     resetAllDOM(state) {
         state.players.forEach(p => {
             const scoreAdmin = document.getElementById(`admin-score-${p.id}`);
@@ -1393,135 +1378,97 @@ class UIManager {
         this.elements.logList.innerHTML = '';
         this.updateScoreboards(state);
     }
+
     renderEmptyState(container, message) {
-        container.innerHTML = '';
-        const empty = this.createElement('div', ['empty-state']);
-        empty.textContent = message;
+        if (container.querySelector('.empty-state')) return;
+        const empty = this.createElement('div', ['empty-state']); empty.textContent = message;
         container.appendChild(empty);
     }
+
     checkEmptyStates(state) {
-        if (state.players.length === 0) {
-            this.renderEmptyState(this.elements.listAdmin, 'O elenco está vazio. Adicione membros acima.');
-        } else {
-            const emptyEl = this.elements.listAdmin.querySelector('.empty-state');
-            if (emptyEl) emptyEl.remove();
-        }
-        const pA = state.players.filter(p => p.team === 'a');
-        if (pA.length === 0) {
-            this.renderEmptyState(this.elements.listScoreA, 'Sem escalação.');
-        } else {
-            const eA = this.elements.listScoreA.querySelector('.empty-state');
-            if (eA) eA.remove();
-        }
-        const pB = state.players.filter(p => p.team === 'b');
-        if (pB.length === 0) {
-            this.renderEmptyState(this.elements.listScoreB, 'Sem escalação.');
-        } else {
-            const eB = this.elements.listScoreB.querySelector('.empty-state');
-            if (eB) eB.remove();
-        }
-        if (state.logs.length === 0) {
-            this.renderEmptyState(this.elements.logList, 'Nenhum registro de ocorrência.');
-        }
+        if (state.players.length === 0) this.renderEmptyState(this.elements.listAdmin, 'O elenco está vazio. Adicione membros acima.');
+        else { const e = this.elements.listAdmin.querySelector('.empty-state'); if (e) e.remove(); }
+        
+        if (state.players.filter(p => p.team === 'a').length === 0) this.renderEmptyState(this.elements.listScoreA, 'Sem escalação.');
+        else { const e = this.elements.listScoreA.querySelector('.empty-state'); if (e) e.remove(); }
+        
+        if (state.players.filter(p => p.team === 'b').length === 0) this.renderEmptyState(this.elements.listScoreB, 'Sem escalação.');
+        else { const e = this.elements.listScoreB.querySelector('.empty-state'); if (e) e.remove(); }
+        
+        if (state.logs.length === 0) this.renderEmptyState(this.elements.logList, 'Nenhum registro de ocorrência.');
+        else { const e = this.elements.logList.querySelector('.empty-state'); if (e) e.remove(); }
     }
+
     renderEmptyStates() {
-        this.renderEmptyState(this.elements.listAdmin, 'O elenco está vazio. Adicione membros acima.');
+        this.renderEmptyState(this.elements.listAdmin, 'O elenco está vazio.');
         this.renderEmptyState(this.elements.listScoreA, 'Sem escalação.');
         this.renderEmptyState(this.elements.listScoreB, 'Sem escalação.');
-        this.renderEmptyState(this.elements.logList, 'Nenhum registro de ocorrência.');
+        this.renderEmptyState(this.elements.logList, 'Nenhum registro.');
     }
+
     showToast(message, type = 'success') {
         const toast = this.createElement('div', ['toast', type]);
         const iconDiv = this.createElement('div', ['toast-icon']);
         const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-        svg.setAttribute('width', '20'); svg.setAttribute('height', '20');
-        svg.setAttribute('viewBox', '0 0 24 24'); svg.setAttribute('fill', 'none');
-        svg.setAttribute('stroke', 'currentColor'); svg.setAttribute('stroke-width', '2.5');
+        svg.setAttribute('width', '20'); svg.setAttribute('height', '20'); svg.setAttribute('viewBox', '0 0 24 24');
+        svg.setAttribute('fill', 'none'); svg.setAttribute('stroke', 'currentColor'); svg.setAttribute('stroke-width', '2.5');
         svg.setAttribute('stroke-linecap', 'round'); svg.setAttribute('stroke-linejoin', 'round');
         if (type === 'success') {
-            const p = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
-            p.setAttribute('points', '20 6 9 17 4 12');
+            const p = document.createElementNS('http://www.w3.org/2000/svg', 'polyline'); p.setAttribute('points', '20 6 9 17 4 12');
             svg.appendChild(p);
         } else {
-            const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-            c.setAttribute('cx', '12'); c.setAttribute('cy', '12'); c.setAttribute('r', '10');
-            const l1 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-            l1.setAttribute('x1', '15'); l1.setAttribute('y1', '9'); l1.setAttribute('x2', '9'); l1.setAttribute('y2', '15');
-            const l2 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-            l2.setAttribute('x1', '9'); l2.setAttribute('y1', '9'); l2.setAttribute('x2', '15'); l2.setAttribute('y2', '15');
-            svg.appendChild(c); svg.appendChild(l1); svg.appendChild(l2);
+            const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle'); c.setAttribute('cx', '12'); c.setAttribute('cy', '12'); c.setAttribute('r', '10');
+            const l1 = document.createElementNS('http://www.w3.org/2000/svg', 'line'); l1.setAttribute('x1', '15'); l1.setAttribute('y1', '9'); l1.setAttribute('x2', '9'); l1.setAttribute('y2', '15');
+            const l2 = document.createElementNS('http://www.w3.org/2000/svg', 'line'); l2.setAttribute('x1', '9'); l2.setAttribute('y1', '9'); l2.setAttribute('x2', '15'); l2.setAttribute('y2', '15');
+            svg.append(c, l1, l2);
         }
         iconDiv.appendChild(svg);
-        const textDiv = this.createElement('div');
-        textDiv.textContent = message;
-        toast.appendChild(iconDiv);
-        toast.appendChild(textDiv);
+        const textDiv = this.createElement('div'); textDiv.textContent = message;
+        toast.append(iconDiv, textDiv);
         this.elements.toastRoot.appendChild(toast);
-        gsap.fromTo(toast, 
-            { opacity: 0, x: 50 }, 
-            { opacity: 1, x: 0, duration: 0.3, ease: 'back.out(1.5)' }
-        );
-        setTimeout(() => {
-            gsap.to(toast, {
-                opacity: 0, x: 50, duration: 0.3, ease: 'power2.in',
-                onComplete: () => toast.remove()
-            });
-        }, 3000);
+        gsap.fromTo(toast, { opacity: 0, x: 50 }, { opacity: 1, x: 0, duration: 0.3, ease: 'back.out(1.5)' });
+        setTimeout(() => gsap.to(toast, { opacity: 0, x: 50, duration: 0.3, ease: 'power2.in', onComplete: () => toast.remove() }), 3000);
     }
+
     showModal(title, message, onConfirm) {
         this.elements.modalRoot.innerHTML = '';
         const content = this.createElement('div', ['modal-content']);
         const header = this.createElement('div', ['modal-header']);
         const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-        svg.setAttribute('width', '24'); svg.setAttribute('height', '24');
-        svg.setAttribute('viewBox', '0 0 24 24'); svg.setAttribute('fill', 'none');
-        svg.setAttribute('stroke', 'var(--color-danger)'); svg.setAttribute('stroke-width', '2.5');
+        svg.setAttribute('width', '24'); svg.setAttribute('height', '24'); svg.setAttribute('viewBox', '0 0 24 24');
+        svg.setAttribute('fill', 'none'); svg.setAttribute('stroke', 'var(--color-danger)'); svg.setAttribute('stroke-width', '2.5');
         svg.setAttribute('stroke-linecap', 'round'); svg.setAttribute('stroke-linejoin', 'round');
-        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        path.setAttribute('d', 'M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z');
-        const l1 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-        l1.setAttribute('x1', '12'); l1.setAttribute('y1', '9'); l1.setAttribute('x2', '12'); l1.setAttribute('y2', '13');
-        const l2 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-        l2.setAttribute('x1', '12'); l2.setAttribute('y1', '17'); l2.setAttribute('x2', '12.01'); l2.setAttribute('y2', '17');
-        svg.appendChild(path); svg.appendChild(l1); svg.appendChild(l2);
-        const titleEl = this.createElement('h3', ['modal-title']);
-        titleEl.textContent = title;
-        header.appendChild(svg);
-        header.appendChild(titleEl);
-        const bodyEl = this.createElement('p', ['modal-body']);
-        bodyEl.textContent = message;
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path'); path.setAttribute('d', 'M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z');
+        const l1 = document.createElementNS('http://www.w3.org/2000/svg', 'line'); l1.setAttribute('x1', '12'); l1.setAttribute('y1', '9'); l1.setAttribute('x2', '12'); l1.setAttribute('y2', '13');
+        const l2 = document.createElementNS('http://www.w3.org/2000/svg', 'line'); l2.setAttribute('x1', '12'); l2.setAttribute('y1', '17'); l2.setAttribute('x2', '12.01'); l2.setAttribute('y2', '17');
+        svg.append(path, l1, l2);
+        const titleEl = this.createElement('h3', ['modal-title']); titleEl.textContent = title;
+        header.append(svg, titleEl);
+        const bodyEl = this.createElement('p', ['modal-body']); bodyEl.textContent = message;
         const actions = this.createElement('div', ['modal-actions']);
-        const btnCancel = this.createElement('button', ['btn', 'btn-outline']);
-        btnCancel.textContent = 'Cancelar';
-        const btnConfirm = this.createElement('button', ['btn', 'btn-danger']);
-        btnConfirm.textContent = 'Confirmar Ação';
+        const btnCancel = this.createElement('button', ['btn', 'btn-outline']); btnCancel.textContent = 'Cancelar';
+        const btnConfirm = this.createElement('button', ['btn', 'btn-danger']); btnConfirm.textContent = 'Confirmar Ação';
+        
         const closeModal = () => {
             gsap.to(content, { y: 20, opacity: 0, duration: 0.2 });
-            gsap.to(this.elements.modalRoot, { opacity: 0, duration: 0.2, onComplete: () => {
-                this.elements.modalRoot.classList.remove('active');
-            }});
+            gsap.to(this.elements.modalRoot, { opacity: 0, duration: 0.2, onComplete: () => this.elements.modalRoot.classList.remove('active') });
         };
         btnCancel.addEventListener('click', closeModal);
-        btnConfirm.addEventListener('click', () => {
-            onConfirm();
-            closeModal();
-        });
-        actions.appendChild(btnCancel);
-        actions.appendChild(btnConfirm);
-        content.appendChild(header);
-        content.appendChild(bodyEl);
-        content.appendChild(actions);
+        btnConfirm.addEventListener('click', () => { onConfirm(); closeModal(); });
+        actions.append(btnCancel, btnConfirm);
+        content.append(header, bodyEl, actions);
         this.elements.modalRoot.appendChild(content);
         this.elements.modalRoot.classList.add('active');
         gsap.to(this.elements.modalRoot, { opacity: 1, duration: 0.2 });
         gsap.fromTo(content, { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.3, ease: 'back.out(1.2)' });
     }
 }
+
 document.addEventListener('DOMContentLoaded', () => {
     const appState = new AppState();
     const confettiEngine = new ConfettiEngine('canvas-confetti');
     const uiManager = new UIManager(appState, confettiEngine);
-    console.log('Aplicação iniciada com sucesso. Sistemas operantes.');
+    console.log('Firebase e Analytics conectados. Sistemas operantes.');
 });
 </script>
 </body>
