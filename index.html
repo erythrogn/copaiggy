@@ -1,0 +1,1528 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Copa do Aniversario</title>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow+Condensed:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<style>
+:root {
+    --color-primary: #00b140;
+    --color-primary-dark: #007a2c;
+    --color-primary-alpha: rgba(0, 177, 64, 0.15);
+    --color-secondary: #1a52c8;
+    --color-secondary-dark: #0f368a;
+    --color-secondary-alpha: rgba(26, 82, 200, 0.15);
+    --color-accent: #f5c800;
+    --color-accent-alpha: rgba(245, 200, 0, 0.12);
+    --color-danger: #cc2200;
+    --color-danger-alpha: rgba(204, 34, 0, 0.15);
+    --color-bg: #090e0c;
+    --color-surface: #111a16;
+    --color-surface-hover: #16241e;
+    --color-border: #1f2e26;
+    --color-border-light: #2d4237;
+    --color-text-main: #f4f5f5;
+    --color-text-muted: #9ba8a2;
+    --color-text-disabled: #5a6b63;
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 16px;
+    --radius-full: 9999px;
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 24px;
+    --space-6: 32px;
+    --space-8: 48px;
+    --space-10: 64px;
+    --font-heading: 'Anton', sans-serif;
+    --font-body: 'Barlow Condensed', sans-serif;
+    --shadow-glow-primary: 0 0 24px rgba(0, 177, 64, 0.3);
+    --shadow-glow-secondary: 0 0 24px rgba(26, 82, 200, 0.3);
+    --shadow-glow-accent: 0 0 32px rgba(245, 200, 0, 0.4);
+    --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+}
+html {
+    font-size: 16px;
+    scroll-behavior: smooth;
+}
+body {
+    background-color: var(--color-bg);
+    background-image: 
+        radial-gradient(circle at 50% 0%, rgba(0, 177, 64, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 100% 100%, rgba(26, 82, 200, 0.05) 0%, transparent 50%);
+    color: var(--color-text-main);
+    font-family: var(--font-body);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow-x: hidden;
+    position: relative;
+    padding-bottom: var(--space-10);
+}
+#canvas-confetti {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 9999;
+}
+.toast-container {
+    position: fixed;
+    bottom: var(--space-4);
+    right: var(--space-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    z-index: 9000;
+    pointer-events: none;
+}
+.toast {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border-light);
+    color: var(--color-text-main);
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    box-shadow: var(--shadow-card);
+    pointer-events: auto;
+}
+.toast-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.toast.success .toast-icon {
+    color: var(--color-primary);
+}
+.toast.danger .toast-icon {
+    color: var(--color-danger);
+}
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(8px);
+    z-index: 9500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+}
+.modal-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+.modal-content {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-6);
+    width: 90%;
+    max-width: 400px;
+    box-shadow: var(--shadow-card);
+    transform: translateY(20px);
+}
+.modal-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin-bottom: var(--space-4);
+}
+.modal-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+.modal-body {
+    color: var(--color-text-muted);
+    font-size: 1.1rem;
+    line-height: 1.5;
+    margin-bottom: var(--space-5);
+}
+.modal-actions {
+    display: flex;
+    gap: var(--space-3);
+    justify-content: flex-end;
+}
+.container {
+    width: 100%;
+    max-width: 768px;
+    padding: 0 var(--space-4);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.header {
+    width: 100%;
+    text-align: center;
+    padding: var(--space-8) 0 var(--space-6) 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.header-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    background: var(--color-accent-alpha);
+    border: 1px solid rgba(245, 200, 0, 0.2);
+    color: var(--color-accent);
+    padding: var(--space-1) var(--space-3);
+    border-radius: var(--radius-sm);
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: var(--space-4);
+}
+.header-title {
+    font-family: var(--font-heading);
+    font-size: clamp(3rem, 10vw, 6rem);
+    line-height: 0.9;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--color-text-main);
+    margin-bottom: var(--space-2);
+}
+.header-title span {
+    color: var(--color-accent);
+}
+.header-subtitle {
+    color: var(--color-text-muted);
+    font-size: 1.2rem;
+    letter-spacing: 0.08em;
+}
+.tabs-container {
+    display: flex;
+    width: 100%;
+    max-width: 500px;
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    margin-bottom: var(--space-6);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+.tab-button {
+    flex: 1;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--color-text-muted);
+    font-family: var(--font-body);
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: var(--space-3) 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    transition: background-color 0.3s ease, color 0.3s ease;
+    outline: none;
+}
+.tab-button:hover {
+    background: var(--color-surface);
+    color: var(--color-text-main);
+}
+.tab-button.active {
+    background: var(--color-primary-alpha);
+    color: var(--color-primary);
+    border-bottom-color: var(--color-primary);
+}
+.view-container {
+    width: 100%;
+    display: none;
+    flex-direction: column;
+    gap: var(--space-4);
+}
+.view-container.active {
+    display: flex;
+}
+.card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-5);
+    width: 100%;
+    box-shadow: var(--shadow-card);
+}
+.card-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin-bottom: var(--space-4);
+    padding-bottom: var(--space-3);
+    border-bottom: 1px solid var(--color-border-light);
+}
+.card-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+}
+.grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-4);
+}
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+.form-label {
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+}
+.form-label.color-a {
+    color: var(--color-primary);
+}
+.form-label.color-b {
+    color: var(--color-secondary);
+}
+.form-input, .form-select {
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-sm);
+    color: var(--color-text-main);
+    font-family: var(--font-body);
+    font-size: 1.1rem;
+    padding: var(--space-3);
+    outline: none;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    width: 100%;
+}
+.form-input:focus, .form-select:focus {
+    border-color: var(--color-primary);
+    box-shadow: var(--shadow-glow-primary);
+}
+.form-input.large {
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    letter-spacing: 0.05em;
+    padding: var(--space-2) var(--space-3);
+}
+.form-select option {
+    background: var(--color-surface);
+    color: var(--color-text-main);
+}
+.form-row {
+    display: flex;
+    gap: var(--space-3);
+    align-items: flex-end;
+    flex-wrap: wrap;
+}
+.form-row .form-group {
+    flex: 1;
+    min-width: 150px;
+}
+.btn {
+    border: none;
+    border-radius: var(--radius-sm);
+    font-family: var(--font-body);
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    transition: transform 0.1s ease, filter 0.3s ease;
+    outline: none;
+}
+.btn:active {
+    transform: scale(0.95);
+}
+.btn-primary {
+    background: var(--color-primary);
+    color: var(--color-bg);
+    padding: var(--space-3) var(--space-5);
+    height: 48px;
+}
+.btn-primary:hover {
+    background: var(--color-primary-dark);
+}
+.btn-danger {
+    background: var(--color-danger);
+    color: var(--color-text-main);
+    padding: var(--space-3) var(--space-5);
+}
+.btn-outline {
+    background: transparent;
+    border: 1px solid var(--color-border-light);
+    color: var(--color-text-muted);
+    padding: var(--space-2) var(--space-4);
+    font-size: 0.9rem;
+}
+.btn-outline:hover {
+    border-color: var(--color-text-main);
+    color: var(--color-text-main);
+}
+.btn-icon {
+    background: transparent;
+    border: 1px solid var(--color-border-light);
+    color: var(--color-text-muted);
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}
+.btn-icon:hover {
+    background: var(--color-surface-hover);
+    color: var(--color-text-main);
+}
+.btn-icon.danger:hover {
+    border-color: var(--color-danger);
+    color: var(--color-danger);
+    background: var(--color-danger-alpha);
+}
+.btn-action {
+    background: transparent;
+    border: 1px solid var(--color-primary-alpha);
+    color: var(--color-primary);
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.btn-action:hover {
+    background: var(--color-primary-alpha);
+}
+.btn-action.minus {
+    border-color: var(--color-danger-alpha);
+    color: var(--color-danger);
+}
+.btn-action.minus:hover {
+    background: var(--color-danger-alpha);
+}
+.btn-action.blue {
+    border-color: var(--color-secondary-alpha);
+    color: var(--color-secondary);
+}
+.btn-action.blue:hover {
+    background: var(--color-secondary-alpha);
+}
+.list-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    max-height: 400px;
+    overflow-y: auto;
+    padding-right: var(--space-2);
+}
+.list-container::-webkit-scrollbar {
+    width: 4px;
+}
+.list-container::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: var(--radius-sm);
+}
+.list-container::-webkit-scrollbar-thumb {
+    background: var(--color-border-light);
+    border-radius: var(--radius-sm);
+}
+.list-item {
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    padding: var(--space-3) var(--space-4);
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    will-change: transform, opacity;
+}
+.avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.avatar.team-a {
+    background: var(--color-primary-alpha);
+    border: 1px solid var(--color-primary);
+    color: var(--color-primary);
+}
+.avatar.team-b {
+    background: var(--color-secondary-alpha);
+    border: 1px solid var(--color-secondary);
+    color: var(--color-secondary);
+}
+.item-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+.item-name {
+    font-size: 1.15rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+}
+.tag {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-top: 2px;
+    width: max-content;
+}
+.tag.team-a {
+    background: var(--color-primary-alpha);
+    color: var(--color-primary);
+}
+.tag.team-b {
+    background: var(--color-secondary-alpha);
+    color: var(--color-secondary);
+}
+.item-score {
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    color: var(--color-accent);
+    min-width: 32px;
+    text-align: center;
+}
+.empty-state {
+    padding: var(--space-6) 0;
+    text-align: center;
+    color: var(--color-text-muted);
+    font-size: 1.1rem;
+    letter-spacing: 0.05em;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-3);
+}
+.scoreboard {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: var(--space-4);
+    margin-bottom: var(--space-6);
+}
+.team-display {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-3);
+}
+.shield {
+    width: 64px;
+    height: 72px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+.shield-svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+.shield-letter {
+    font-family: var(--font-heading);
+    font-size: 1.8rem;
+    z-index: 1;
+}
+.shield.team-a .shield-letter {
+    color: var(--color-primary);
+}
+.shield.team-b .shield-letter {
+    color: var(--color-secondary);
+}
+.team-name-display {
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    text-align: center;
+}
+.team-name-display.team-a {
+    color: var(--color-primary);
+}
+.team-name-display.team-b {
+    color: var(--color-secondary);
+}
+.score-number {
+    font-family: var(--font-heading);
+    font-size: clamp(4rem, 15vw, 8rem);
+    line-height: 1;
+    transition: color 0.3s ease, text-shadow 0.3s ease;
+}
+.score-number.team-a {
+    color: var(--color-primary);
+}
+.score-number.team-b {
+    color: var(--color-secondary);
+}
+.score-number.leader {
+    color: var(--color-accent);
+    text-shadow: var(--shadow-glow-accent);
+}
+.score-divider {
+    font-family: var(--font-heading);
+    font-size: clamp(2rem, 8vw, 3rem);
+    color: var(--color-text-disabled);
+    padding-bottom: var(--space-6);
+}
+.player-score-row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+.player-score-row:last-child {
+    border-bottom: none;
+}
+.psr-name {
+    flex: 1;
+    font-size: 1.1rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.psr-score {
+    font-family: var(--font-heading);
+    font-size: 1.4rem;
+    color: var(--color-accent);
+    min-width: 32px;
+    text-align: center;
+}
+.total-bar {
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-4) var(--space-5);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-6);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+.total-label {
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+.total-value {
+    font-family: var(--font-heading);
+    font-size: 2.5rem;
+    color: var(--color-primary);
+    text-shadow: var(--shadow-glow-primary);
+    line-height: 1;
+}
+.log-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-4);
+}
+.log-entry {
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    padding: var(--space-2) var(--space-4);
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin-bottom: var(--space-2);
+}
+.log-seq {
+    font-family: var(--font-heading);
+    font-size: 1.2rem;
+    color: var(--color-accent);
+    min-width: 24px;
+}
+.log-name {
+    flex: 1;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+.log-time {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+}
+@media (max-width: 600px) {
+    .grid-2 {
+        grid-template-columns: 1fr;
+    }
+    .form-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .btn-primary {
+        width: 100%;
+    }
+    .scoreboard {
+        gap: var(--space-2);
+    }
+    .total-bar {
+        flex-direction: column;
+        gap: var(--space-3);
+        text-align: center;
+    }
+}
+</style>
+</head>
+<body>
+<canvas id="canvas-confetti"></canvas>
+<div id="toast-root" class="toast-container"></div>
+<div id="modal-root" class="modal-overlay"></div>
+<div class="container">
+    <header class="header">
+        <div class="header-badge">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10A15.3 15.3 0 0 1 8 12 15.3 15.3 0 0 1 12 2z"></path>
+                <path d="M2 12h20"></path>
+            </svg>
+            Copa da Iggy Azaketty
+        </div>
+        <h1 class="header-title">Contador<br>de <span>Doses</span></h1>
+        <p class="header-subtitle">Cada gol vale uma dose rigorosamente cobrada.</p>
+    </header>
+    <nav class="tabs-container">
+        <button id="tab-cadastro" class="tab-button" data-target="view-cadastro">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+            Jogadores
+        </button>
+        <button id="tab-placar" class="tab-button active" data-target="view-placar">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+                <path d="M3 9h18"></path>
+                <path d="M9 21V9"></path>
+            </svg>
+            Placar
+        </button>
+    </nav>
+    <main id="view-cadastro" class="view-container">
+        <section class="card">
+            <div class="card-header">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+                    <path d="M2 17l10 5 10-5"></path>
+                    <path d="M2 12l10 5 10-5"></path>
+                </svg>
+                <h2 class="card-title">Configuração dos Times</h2>
+            </div>
+            <div class="grid-2">
+                <div class="form-group">
+                    <label class="form-label color-a">Equipe A</label>
+                    <input type="text" id="input-team-a" class="form-input large" value="Time Verde" maxlength="20">
+                </div>
+                <div class="form-group">
+                    <label class="form-label color-b">Equipe B</label>
+                    <input type="text" id="input-team-b" class="form-input large" value="Time Azul" maxlength="20">
+                </div>
+            </div>
+        </section>
+        <section class="card">
+            <div class="card-header">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                    <line x1="12" y1="14" x2="12" y2="22"></line>
+                    <line x1="8" y1="18" x2="16" y2="18"></line>
+                </svg>
+                <h2 class="card-title">Recrutamento</h2>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Identificação</label>
+                    <input type="text" id="input-player-name" class="form-input" placeholder="Nome do jogador" maxlength="28">
+                </div>
+                <div class="form-group" style="flex: 0.5;">
+                    <label class="form-label">Seleção</label>
+                    <select id="select-player-team" class="form-select">
+                        <option value="a">Equipe A</option>
+                        <option value="b">Equipe B</option>
+                    </select>
+                </div>
+                <button id="btn-add-player" class="btn btn-primary">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    Adicionar
+                </button>
+            </div>
+        </section>
+        <section class="card">
+            <div class="card-header">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="8" y1="6" x2="21" y2="6"></line>
+                    <line x1="8" y1="12" x2="21" y2="12"></line>
+                    <line x1="8" y1="18" x2="21" y2="18"></line>
+                    <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                    <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                    <line x1="3" y1="18" x2="3.01" y2="18"></line>
+                </svg>
+                <h2 class="card-title">Elenco Registrado</h2>
+            </div>
+            <div id="players-list-admin" class="list-container"></div>
+        </section>
+    </main>
+    <main id="view-placar" class="view-container active">
+        <section class="scoreboard">
+            <div class="team-display">
+                <div class="shield team-a">
+                    <svg class="shield-svg" viewBox="0 0 52 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M26 2L4 12V32C4 44.5 14 55 26 58C38 55 48 44.5 48 32V12L26 2Z" fill="var(--color-primary-alpha)" stroke="var(--color-primary)" stroke-width="2"></path>
+                        <path d="M26 10L10 18V32C10 40.5 17.5 48 26 50.5C34.5 48 42 40.5 42 32V18L26 10Z" fill="rgba(0,177,64,.05)" stroke="var(--color-primary)" stroke-width="1" stroke-dasharray="4 4"></path>
+                    </svg>
+                    <span class="shield-letter">A</span>
+                </div>
+                <div id="display-team-a-name" class="team-name-display team-a">Time Verde</div>
+                <div id="display-team-a-score" class="score-number team-a">0</div>
+            </div>
+            <div class="score-divider">X</div>
+            <div class="team-display">
+                <div class="shield team-b">
+                    <svg class="shield-svg" viewBox="0 0 52 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M26 2L4 12V32C4 44.5 14 55 26 58C38 55 48 44.5 48 32V12L26 2Z" fill="var(--color-secondary-alpha)" stroke="var(--color-secondary)" stroke-width="2"></path>
+                        <path d="M26 10L10 18V32C10 40.5 17.5 48 26 50.5C34.5 48 42 40.5 42 32V18L26 10Z" fill="rgba(26,82,200,.05)" stroke="var(--color-secondary)" stroke-width="1" stroke-dasharray="4 4"></path>
+                    </svg>
+                    <span class="shield-letter">B</span>
+                </div>
+                <div id="display-team-b-name" class="team-name-display team-b">Time Azul</div>
+                <div id="display-team-b-score" class="score-number team-b">0</div>
+            </div>
+        </section>
+        <section class="grid-2">
+            <div class="card">
+                <div class="card-header" style="border-bottom-color: var(--color-primary-alpha);">
+                    <h2 id="card-team-a-name" class="card-title" style="color: var(--color-primary);">Time Verde</h2>
+                </div>
+                <div id="players-list-score-a" class="list-container"></div>
+            </div>
+            <div class="card">
+                <div class="card-header" style="border-bottom-color: var(--color-secondary-alpha);">
+                    <h2 id="card-team-b-name" class="card-title" style="color: var(--color-secondary);">Time Azul</h2>
+                </div>
+                <div id="players-list-score-b" class="list-container"></div>
+            </div>
+        </section>
+        <section class="total-bar">
+            <div class="total-label">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                </svg>
+                Volume Total Consumido
+            </div>
+            <div id="display-total-score" class="total-value">0</div>
+        </section>
+        <section class="card">
+            <div class="log-header">
+                <div class="total-label">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                    </svg>
+                    Registro de Ocorrências
+                </div>
+                <button id="btn-reset-all" class="btn btn-outline">Limpar Dados</button>
+            </div>
+            <div id="log-list" class="list-container"></div>
+        </section>
+    </main>
+</div>
+<script>
+class Vector2D {
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
+    }
+    add(vector) {
+        this.x += vector.x;
+        this.y += vector.y;
+    }
+    multiply(scalar) {
+        this.x *= scalar;
+        this.y *= scalar;
+    }
+}
+class ConfettiParticle {
+    constructor(x, y, context) {
+        this.context = context;
+        this.position = new Vector2D(x, y);
+        this.velocity = new Vector2D(
+            (Math.random() - 0.5) * 20,
+            (Math.random() - 1) * 25
+        );
+        this.gravity = new Vector2D(0, 0.5);
+        this.friction = 0.98;
+        this.size = Math.random() * 8 + 6;
+        const colors = ['#00b140', '#1a52c8', '#f5c800', '#cc2200', '#ffffff'];
+        this.color = colors[Math.floor(Math.random() * colors.length)];
+        this.rotation = Math.random() * 360;
+        this.rotationSpeed = (Math.random() - 0.5) * 10;
+        this.opacity = 1;
+        this.decay = Math.random() * 0.015 + 0.01;
+    }
+    update() {
+        this.velocity.add(this.gravity);
+        this.velocity.multiply(this.friction);
+        this.position.add(this.velocity);
+        this.rotation += this.rotationSpeed;
+        this.opacity -= this.decay;
+    }
+    draw() {
+        this.context.save();
+        this.context.translate(this.position.x, this.position.y);
+        this.context.rotate((this.rotation * Math.PI) / 180);
+        this.context.globalAlpha = Math.max(0, this.opacity);
+        this.context.fillStyle = this.color;
+        this.context.fillRect(-this.size / 2, -this.size / 2, this.size, this.size);
+        this.context.restore();
+    }
+    isDead() {
+        return this.opacity <= 0 || this.position.y > window.innerHeight;
+    }
+}
+class ConfettiEngine {
+    constructor(canvasId) {
+        this.canvas = document.getElementById(canvasId);
+        this.context = this.canvas.getContext('2d');
+        this.particles = [];
+        this.isRunning = false;
+        this.resizeHandler = this.resize.bind(this);
+        window.addEventListener('resize', this.resizeHandler);
+        this.resize();
+    }
+    resize() {
+        this.canvas.width = window.innerWidth;
+        this.canvas.height = window.innerHeight;
+    }
+    burst(x, y, count = 60) {
+        for (let i = 0; i < count; i++) {
+            this.particles.push(new ConfettiParticle(x, y, this.context));
+        }
+        if (!this.isRunning) {
+            this.isRunning = true;
+            this.loop();
+        }
+    }
+    loop() {
+        this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        for (let i = this.particles.length - 1; i >= 0; i--) {
+            const p = this.particles[i];
+            p.update();
+            p.draw();
+            if (p.isDead()) {
+                this.particles.splice(i, 1);
+            }
+        }
+        if (this.particles.length > 0) {
+            requestAnimationFrame(this.loop.bind(this));
+        } else {
+            this.isRunning = false;
+            this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        }
+    }
+}
+class AppState {
+    constructor() {
+        this.state = {
+            teamA: 'Time Verde',
+            teamB: 'Time Azul',
+            players: [],
+            logs: []
+        };
+        this.listeners = [];
+    }
+    subscribe(listener) {
+        this.listeners.push(listener);
+    }
+    notify(event, data) {
+        this.listeners.forEach(listener => listener(event, data, this.state));
+    }
+    updateTeamName(team, name) {
+        if (team === 'a') this.state.teamA = name;
+        if (team === 'b') this.state.teamB = name;
+        this.notify('TEAM_UPDATED', { team, name });
+    }
+    addPlayer(name, team) {
+        const id = 'player_' + Date.now().toString(36) + Math.random().toString(36).substr(2);
+        const newPlayer = { id, name, team, score: 0 };
+        this.state.players.push(newPlayer);
+        this.notify('PLAYER_ADDED', newPlayer);
+    }
+    removePlayer(id) {
+        const index = this.state.players.findIndex(p => p.id === id);
+        if (index !== -1) {
+            const player = this.state.players[index];
+            this.state.players.splice(index, 1);
+            this.notify('PLAYER_REMOVED', player);
+        }
+    }
+    incrementScore(id) {
+        const player = this.state.players.find(p => p.id === id);
+        if (player) {
+            player.score += 1;
+            const logEntry = {
+                id: 'log_' + Date.now().toString(36),
+                playerName: player.name,
+                team: player.team,
+                time: new Date().toLocaleTimeString('pt-BR')
+            };
+            this.state.logs.unshift(logEntry);
+            this.notify('SCORE_INCREMENTED', { player, logEntry });
+        }
+    }
+    decrementScore(id) {
+        const player = this.state.players.find(p => p.id === id);
+        if (player && player.score > 0) {
+            player.score -= 1;
+            const logIndex = this.state.logs.findIndex(l => l.playerName === player.name);
+            let removedLog = null;
+            if (logIndex !== -1) {
+                removedLog = this.state.logs[logIndex];
+                this.state.logs.splice(logIndex, 1);
+            }
+            this.notify('SCORE_DECREMENTED', { player, removedLog });
+        }
+    }
+    resetAll() {
+        this.state.players.forEach(p => p.score = 0);
+        this.state.logs = [];
+        this.notify('ALL_RESET', null);
+    }
+}
+class UIManager {
+    constructor(stateManager, confettiEngine) {
+        this.stateManager = stateManager;
+        this.confetti = confettiEngine;
+        this.elements = {
+            tabs: document.querySelectorAll('.tab-button'),
+            views: document.querySelectorAll('.view-container'),
+            inputTeamA: document.getElementById('input-team-a'),
+            inputTeamB: document.getElementById('input-team-b'),
+            displayTeamAName: document.getElementById('display-team-a-name'),
+            displayTeamBName: document.getElementById('display-team-b-name'),
+            cardTeamAName: document.getElementById('card-team-a-name'),
+            cardTeamBName: document.getElementById('card-team-b-name'),
+            selectTeamA: document.querySelector('#select-player-team option[value="a"]'),
+            selectTeamB: document.querySelector('#select-player-team option[value="b"]'),
+            inputPlayerName: document.getElementById('input-player-name'),
+            selectPlayerTeam: document.getElementById('select-player-team'),
+            btnAddPlayer: document.getElementById('btn-add-player'),
+            listAdmin: document.getElementById('players-list-admin'),
+            listScoreA: document.getElementById('players-list-score-a'),
+            listScoreB: document.getElementById('players-list-score-b'),
+            displayScoreA: document.getElementById('display-team-a-score'),
+            displayScoreB: document.getElementById('display-team-b-score'),
+            displayTotal: document.getElementById('display-total-score'),
+            logList: document.getElementById('log-list'),
+            btnResetAll: document.getElementById('btn-reset-all'),
+            toastRoot: document.getElementById('toast-root'),
+            modalRoot: document.getElementById('modal-root')
+        };
+        this.bindEvents();
+        this.stateManager.subscribe(this.handleStateChange.bind(this));
+        this.renderEmptyStates();
+    }
+    bindEvents() {
+        this.elements.tabs.forEach(tab => {
+            tab.addEventListener('click', (e) => this.switchTab(e.currentTarget));
+        });
+        this.elements.inputTeamA.addEventListener('input', (e) => {
+            this.stateManager.updateTeamName('a', e.target.value || 'Equipe A');
+        });
+        this.elements.inputTeamB.addEventListener('input', (e) => {
+            this.stateManager.updateTeamName('b', e.target.value || 'Equipe B');
+        });
+        const addHandler = () => {
+            const name = this.elements.inputPlayerName.value.trim();
+            const team = this.elements.selectPlayerTeam.value;
+            if (name) {
+                this.stateManager.addPlayer(name, team);
+                this.elements.inputPlayerName.value = '';
+                this.elements.inputPlayerName.focus();
+            } else {
+                this.showToast('Informe o nome do jogador.', 'danger');
+            }
+        };
+        this.elements.btnAddPlayer.addEventListener('click', addHandler);
+        this.elements.inputPlayerName.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') addHandler();
+        });
+        this.elements.btnResetAll.addEventListener('click', () => {
+            this.showModal(
+                'Atenção Crítica',
+                'Tem certeza que deseja zerar completamente o placar e histórico? Esta ação é irreversível.',
+                () => {
+                    this.stateManager.resetAll();
+                    this.showToast('Placar reiniciado com sucesso.', 'success');
+                }
+            );
+        });
+    }
+    handleStateChange(event, data, state) {
+        switch (event) {
+            case 'TEAM_UPDATED':
+                this.syncTeamNames(state);
+                this.updateTagsInDOM(state);
+                break;
+            case 'PLAYER_ADDED':
+                this.renderPlayerAdmin(data, state);
+                this.renderPlayerScoreRow(data);
+                this.checkEmptyStates(state);
+                this.showToast(`Jogador ${data.name} recrutado.`, 'success');
+                break;
+            case 'PLAYER_REMOVED':
+                this.removePlayerDOM(data.id);
+                this.checkEmptyStates(state);
+                this.updateScoreboards(state);
+                this.showToast(`Jogador removido.`, 'success');
+                break;
+            case 'SCORE_INCREMENTED':
+                this.updatePlayerScoreDOM(data.player);
+                this.updateScoreboards(state);
+                this.renderLogEntry(data.logEntry, state);
+                this.animateScorePulse(data.player.team);
+                this.triggerConfetti();
+                break;
+            case 'SCORE_DECREMENTED':
+                this.updatePlayerScoreDOM(data.player);
+                this.updateScoreboards(state);
+                this.removeLogEntryDOM(data.removedLog?.id);
+                break;
+            case 'ALL_RESET':
+                this.resetAllDOM(state);
+                this.checkEmptyStates(state);
+                break;
+        }
+    }
+    switchTab(targetTab) {
+        const targetId = targetTab.getAttribute('data-target');
+        if (targetTab.classList.contains('active')) return;
+        this.elements.tabs.forEach(tab => tab.classList.remove('active'));
+        targetTab.classList.add('active');
+        const currentView = document.querySelector('.view-container.active');
+        const nextView = document.getElementById(targetId);
+        gsap.to(currentView, {
+            opacity: 0,
+            y: -10,
+            duration: 0.2,
+            onComplete: () => {
+                currentView.classList.remove('active');
+                nextView.classList.add('active');
+                gsap.fromTo(nextView, 
+                    { opacity: 0, y: 10 }, 
+                    { opacity: 1, y: 0, duration: 0.3, ease: 'power2.out' }
+                );
+            }
+        });
+    }
+    syncTeamNames(state) {
+        this.elements.displayTeamAName.textContent = state.teamA;
+        this.elements.displayTeamBName.textContent = state.teamB;
+        this.elements.cardTeamAName.textContent = state.teamA;
+        this.elements.cardTeamBName.textContent = state.teamB;
+        this.elements.selectTeamA.textContent = state.teamA;
+        this.elements.selectTeamB.textContent = state.teamB;
+    }
+    updateTagsInDOM(state) {
+        document.querySelectorAll('.tag.team-a').forEach(el => el.textContent = state.teamA);
+        document.querySelectorAll('.tag.team-b').forEach(el => el.textContent = state.teamB);
+        document.querySelectorAll('.log-time.team-a').forEach(el => el.textContent = state.teamA);
+        document.querySelectorAll('.log-time.team-b').forEach(el => el.textContent = state.teamB);
+    }
+    createElement(tag, classNames = [], attributes = {}) {
+        const el = document.createElement(tag);
+        if (classNames.length) el.classList.add(...classNames);
+        for (const [key, value] of Object.entries(attributes)) {
+            el.setAttribute(key, value);
+        }
+        return el;
+    }
+    createSVGIcon(type) {
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('width', '16');
+        svg.setAttribute('height', '16');
+        svg.setAttribute('viewBox', '0 0 24 24');
+        svg.setAttribute('fill', 'none');
+        svg.setAttribute('stroke', 'currentColor');
+        svg.setAttribute('stroke-width', '2.5');
+        svg.setAttribute('stroke-linecap', 'round');
+        svg.setAttribute('stroke-linejoin', 'round');
+        if (type === 'user') {
+            const path1 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            path1.setAttribute('d', 'M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2');
+            const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            circle.setAttribute('cx', '12');
+            circle.setAttribute('cy', '7');
+            circle.setAttribute('r', '4');
+            svg.appendChild(path1);
+            svg.appendChild(circle);
+        } else if (type === 'trash') {
+            const p1 = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+            p1.setAttribute('points', '3 6 5 6 21 6');
+            const p2 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            p2.setAttribute('d', 'M19 6l-1 14H6L5 6');
+            const p3 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            p3.setAttribute('d', 'M10 11v6');
+            const p4 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            p4.setAttribute('d', 'M14 11v6');
+            const p5 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            p5.setAttribute('d', 'M9 6V4h6v2');
+            svg.appendChild(p1); svg.appendChild(p2); svg.appendChild(p3); svg.appendChild(p4); svg.appendChild(p5);
+        } else if (type === 'plus') {
+            const p1 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            p1.setAttribute('x1', '12'); p1.setAttribute('y1', '5'); p1.setAttribute('x2', '12'); p1.setAttribute('y2', '19');
+            const p2 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            p2.setAttribute('x1', '5'); p2.setAttribute('y1', '12'); p2.setAttribute('x2', '19'); p2.setAttribute('y2', '12');
+            svg.appendChild(p1); svg.appendChild(p2);
+        } else if (type === 'minus') {
+            const p1 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            p1.setAttribute('x1', '5'); p1.setAttribute('y1', '12'); p1.setAttribute('x2', '19'); p1.setAttribute('y2', '12');
+            svg.appendChild(p1);
+        }
+        return svg;
+    }
+    renderPlayerAdmin(player, state) {
+        const teamName = player.team === 'a' ? state.teamA : state.teamB;
+        const item = this.createElement('div', ['list-item'], { id: `admin-${player.id}` });
+        const avatar = this.createElement('div', ['avatar', `team-${player.team}`]);
+        avatar.appendChild(this.createSVGIcon('user'));
+        const info = this.createElement('div', ['item-info']);
+        const nameEl = this.createElement('span', ['item-name']);
+        nameEl.textContent = player.name;
+        const tag = this.createElement('span', ['tag', `team-${player.team}`]);
+        tag.textContent = teamName;
+        info.appendChild(nameEl);
+        info.appendChild(tag);
+        const score = this.createElement('span', ['item-score'], { id: `admin-score-${player.id}` });
+        score.textContent = player.score;
+        const btn = this.createElement('button', ['btn-icon', 'danger'], { title: 'Remover' });
+        btn.appendChild(this.createSVGIcon('trash'));
+        btn.addEventListener('click', () => {
+            this.showModal('Confirmar Ação', `Remover o jogador ${player.name} permanentemente?`, () => {
+                this.stateManager.removePlayer(player.id);
+            });
+        });
+        item.appendChild(avatar);
+        item.appendChild(info);
+        item.appendChild(score);
+        item.appendChild(btn);
+        this.elements.listAdmin.appendChild(item);
+        gsap.from(item, { opacity: 0, x: -20, duration: 0.3, ease: 'power2.out' });
+    }
+    renderPlayerScoreRow(player) {
+        const row = this.createElement('div', ['player-score-row'], { id: `score-row-${player.id}` });
+        const nameEl = this.createElement('span', ['psr-name']);
+        nameEl.textContent = player.name;
+        const scoreEl = this.createElement('span', ['psr-score'], { id: `score-val-${player.id}` });
+        scoreEl.textContent = player.score;
+        const btnMinus = this.createElement('button', ['btn-action', 'minus'], { title: 'Remover dose' });
+        btnMinus.appendChild(this.createSVGIcon('minus'));
+        btnMinus.addEventListener('click', () => this.stateManager.decrementScore(player.id));
+        const btnClassType = player.team === 'b' ? 'blue' : '';
+        const btnClasses = btnClassType ? ['btn-action', btnClassType] : ['btn-action'];
+        const btnPlus = this.createElement('button', btnClasses, { title: 'Marcar dose' });
+        btnPlus.appendChild(this.createSVGIcon('plus'));
+        btnPlus.addEventListener('click', () => this.stateManager.incrementScore(player.id));
+        row.appendChild(nameEl);
+        row.appendChild(scoreEl);
+        row.appendChild(btnMinus);
+        row.appendChild(btnPlus);
+        if (player.team === 'a') {
+            this.elements.listScoreA.appendChild(row);
+        } else {
+            this.elements.listScoreB.appendChild(row);
+        }
+        gsap.from(row, { opacity: 0, y: 10, duration: 0.3, ease: 'power1.out' });
+    }
+    removePlayerDOM(id) {
+        const adminEl = document.getElementById(`admin-${id}`);
+        const scoreEl = document.getElementById(`score-row-${id}`);
+        if (adminEl) {
+            gsap.to(adminEl, { opacity: 0, x: 20, duration: 0.2, onComplete: () => adminEl.remove() });
+        }
+        if (scoreEl) {
+            gsap.to(scoreEl, { opacity: 0, scale: 0.9, duration: 0.2, onComplete: () => scoreEl.remove() });
+        }
+    }
+    updatePlayerScoreDOM(player) {
+        const adminScore = document.getElementById(`admin-score-${player.id}`);
+        const viewScore = document.getElementById(`score-val-${player.id}`);
+        if (adminScore) adminScore.textContent = player.score;
+        if (viewScore) {
+            viewScore.textContent = player.score;
+            gsap.fromTo(viewScore, { scale: 1.5, color: '#fff' }, { scale: 1, color: 'var(--color-accent)', duration: 0.4 });
+        }
+    }
+    updateScoreboards(state) {
+        let scoreA = 0;
+        let scoreB = 0;
+        state.players.forEach(p => {
+            if (p.team === 'a') scoreA += p.score;
+            if (p.team === 'b') scoreB += p.score;
+        });
+        const currentA = parseInt(this.elements.displayScoreA.textContent);
+        const currentB = parseInt(this.elements.displayScoreB.textContent);
+        if (currentA !== scoreA) {
+            this.elements.displayScoreA.textContent = scoreA;
+        }
+        if (currentB !== scoreB) {
+            this.elements.displayScoreB.textContent = scoreB;
+        }
+        this.elements.displayScoreA.classList.remove('leader');
+        this.elements.displayScoreB.classList.remove('leader');
+        if (scoreA > scoreB) this.elements.displayScoreA.classList.add('leader');
+        if (scoreB > scoreA) this.elements.displayScoreB.classList.add('leader');
+        this.elements.displayTotal.textContent = scoreA + scoreB;
+    }
+    animateScorePulse(team) {
+        const el = team === 'a' ? this.elements.displayScoreA : this.elements.displayScoreB;
+        gsap.timeline()
+            .to(el, { scale: 1.2, duration: 0.1, ease: 'power2.out' })
+            .to(el, { scale: 1, duration: 0.3, ease: 'bounce.out' });
+    }
+    triggerConfetti() {
+        const rect = document.querySelector('.score-divider').getBoundingClientRect();
+        this.confetti.burst(rect.left + rect.width / 2, rect.top);
+    }
+    renderLogEntry(logEntry, state) {
+        const teamName = logEntry.team === 'a' ? state.teamA : state.teamB;
+        const index = state.logs.length;
+        const entry = this.createElement('div', ['log-entry'], { id: logEntry.id });
+        const seq = this.createElement('span', ['log-seq']);
+        seq.textContent = index;
+        const name = this.createElement('span', ['log-name']);
+        name.textContent = logEntry.playerName;
+        const tag = this.createElement('span', ['tag', `team-${logEntry.team}`, 'log-time']);
+        tag.textContent = teamName;
+        const time = this.createElement('span', ['log-time']);
+        time.textContent = logEntry.time;
+        entry.appendChild(seq);
+        entry.appendChild(name);
+        entry.appendChild(tag);
+        entry.appendChild(time);
+        if (this.elements.logList.querySelector('.empty-state')) {
+            this.elements.logList.innerHTML = '';
+        }
+        this.elements.logList.insertBefore(entry, this.elements.logList.firstChild);
+        gsap.from(entry, { opacity: 0, height: 0, padding: 0, duration: 0.3, ease: 'power2.out' });
+        this.renumberLogs();
+    }
+    removeLogEntryDOM(id) {
+        if (!id) return;
+        const entry = document.getElementById(id);
+        if (entry) {
+            gsap.to(entry, { opacity: 0, height: 0, padding: 0, duration: 0.2, onComplete: () => {
+                entry.remove();
+                this.renumberLogs();
+                if (this.elements.logList.children.length === 0) {
+                    this.renderEmptyState(this.elements.logList, 'Nenhum registro de ocorrência.');
+                }
+            }});
+        }
+    }
+    renumberLogs() {
+        const entries = this.elements.logList.querySelectorAll('.log-entry');
+        const total = entries.length;
+        entries.forEach((entry, index) => {
+            const seqEl = entry.querySelector('.log-seq');
+            if (seqEl) seqEl.textContent = total - index;
+        });
+    }
+    resetAllDOM(state) {
+        state.players.forEach(p => {
+            const scoreAdmin = document.getElementById(`admin-score-${p.id}`);
+            const scoreView = document.getElementById(`score-val-${p.id}`);
+            if (scoreAdmin) scoreAdmin.textContent = '0';
+            if (scoreView) scoreView.textContent = '0';
+        });
+        this.elements.logList.innerHTML = '';
+        this.updateScoreboards(state);
+    }
+    renderEmptyState(container, message) {
+        container.innerHTML = '';
+        const empty = this.createElement('div', ['empty-state']);
+        empty.textContent = message;
+        container.appendChild(empty);
+    }
+    checkEmptyStates(state) {
+        if (state.players.length === 0) {
+            this.renderEmptyState(this.elements.listAdmin, 'O elenco está vazio. Adicione membros acima.');
+        } else {
+            const emptyEl = this.elements.listAdmin.querySelector('.empty-state');
+            if (emptyEl) emptyEl.remove();
+        }
+        const pA = state.players.filter(p => p.team === 'a');
+        if (pA.length === 0) {
+            this.renderEmptyState(this.elements.listScoreA, 'Sem escalação.');
+        } else {
+            const eA = this.elements.listScoreA.querySelector('.empty-state');
+            if (eA) eA.remove();
+        }
+        const pB = state.players.filter(p => p.team === 'b');
+        if (pB.length === 0) {
+            this.renderEmptyState(this.elements.listScoreB, 'Sem escalação.');
+        } else {
+            const eB = this.elements.listScoreB.querySelector('.empty-state');
+            if (eB) eB.remove();
+        }
+        if (state.logs.length === 0) {
+            this.renderEmptyState(this.elements.logList, 'Nenhum registro de ocorrência.');
+        }
+    }
+    renderEmptyStates() {
+        this.renderEmptyState(this.elements.listAdmin, 'O elenco está vazio. Adicione membros acima.');
+        this.renderEmptyState(this.elements.listScoreA, 'Sem escalação.');
+        this.renderEmptyState(this.elements.listScoreB, 'Sem escalação.');
+        this.renderEmptyState(this.elements.logList, 'Nenhum registro de ocorrência.');
+    }
+    showToast(message, type = 'success') {
+        const toast = this.createElement('div', ['toast', type]);
+        const iconDiv = this.createElement('div', ['toast-icon']);
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('width', '20'); svg.setAttribute('height', '20');
+        svg.setAttribute('viewBox', '0 0 24 24'); svg.setAttribute('fill', 'none');
+        svg.setAttribute('stroke', 'currentColor'); svg.setAttribute('stroke-width', '2.5');
+        svg.setAttribute('stroke-linecap', 'round'); svg.setAttribute('stroke-linejoin', 'round');
+        if (type === 'success') {
+            const p = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+            p.setAttribute('points', '20 6 9 17 4 12');
+            svg.appendChild(p);
+        } else {
+            const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            c.setAttribute('cx', '12'); c.setAttribute('cy', '12'); c.setAttribute('r', '10');
+            const l1 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            l1.setAttribute('x1', '15'); l1.setAttribute('y1', '9'); l1.setAttribute('x2', '9'); l1.setAttribute('y2', '15');
+            const l2 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            l2.setAttribute('x1', '9'); l2.setAttribute('y1', '9'); l2.setAttribute('x2', '15'); l2.setAttribute('y2', '15');
+            svg.appendChild(c); svg.appendChild(l1); svg.appendChild(l2);
+        }
+        iconDiv.appendChild(svg);
+        const textDiv = this.createElement('div');
+        textDiv.textContent = message;
+        toast.appendChild(iconDiv);
+        toast.appendChild(textDiv);
+        this.elements.toastRoot.appendChild(toast);
+        gsap.fromTo(toast, 
+            { opacity: 0, x: 50 }, 
+            { opacity: 1, x: 0, duration: 0.3, ease: 'back.out(1.5)' }
+        );
+        setTimeout(() => {
+            gsap.to(toast, {
+                opacity: 0, x: 50, duration: 0.3, ease: 'power2.in',
+                onComplete: () => toast.remove()
+            });
+        }, 3000);
+    }
+    showModal(title, message, onConfirm) {
+        this.elements.modalRoot.innerHTML = '';
+        const content = this.createElement('div', ['modal-content']);
+        const header = this.createElement('div', ['modal-header']);
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('width', '24'); svg.setAttribute('height', '24');
+        svg.setAttribute('viewBox', '0 0 24 24'); svg.setAttribute('fill', 'none');
+        svg.setAttribute('stroke', 'var(--color-danger)'); svg.setAttribute('stroke-width', '2.5');
+        svg.setAttribute('stroke-linecap', 'round'); svg.setAttribute('stroke-linejoin', 'round');
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        path.setAttribute('d', 'M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z');
+        const l1 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        l1.setAttribute('x1', '12'); l1.setAttribute('y1', '9'); l1.setAttribute('x2', '12'); l1.setAttribute('y2', '13');
+        const l2 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        l2.setAttribute('x1', '12'); l2.setAttribute('y1', '17'); l2.setAttribute('x2', '12.01'); l2.setAttribute('y2', '17');
+        svg.appendChild(path); svg.appendChild(l1); svg.appendChild(l2);
+        const titleEl = this.createElement('h3', ['modal-title']);
+        titleEl.textContent = title;
+        header.appendChild(svg);
+        header.appendChild(titleEl);
+        const bodyEl = this.createElement('p', ['modal-body']);
+        bodyEl.textContent = message;
+        const actions = this.createElement('div', ['modal-actions']);
+        const btnCancel = this.createElement('button', ['btn', 'btn-outline']);
+        btnCancel.textContent = 'Cancelar';
+        const btnConfirm = this.createElement('button', ['btn', 'btn-danger']);
+        btnConfirm.textContent = 'Confirmar Ação';
+        const closeModal = () => {
+            gsap.to(content, { y: 20, opacity: 0, duration: 0.2 });
+            gsap.to(this.elements.modalRoot, { opacity: 0, duration: 0.2, onComplete: () => {
+                this.elements.modalRoot.classList.remove('active');
+            }});
+        };
+        btnCancel.addEventListener('click', closeModal);
+        btnConfirm.addEventListener('click', () => {
+            onConfirm();
+            closeModal();
+        });
+        actions.appendChild(btnCancel);
+        actions.appendChild(btnConfirm);
+        content.appendChild(header);
+        content.appendChild(bodyEl);
+        content.appendChild(actions);
+        this.elements.modalRoot.appendChild(content);
+        this.elements.modalRoot.classList.add('active');
+        gsap.to(this.elements.modalRoot, { opacity: 1, duration: 0.2 });
+        gsap.fromTo(content, { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.3, ease: 'back.out(1.2)' });
+    }
+}
+document.addEventListener('DOMContentLoaded', () => {
+    const appState = new AppState();
+    const confettiEngine = new ConfettiEngine('canvas-confetti');
+    const uiManager = new UIManager(appState, confettiEngine);
+    console.log('Aplicação iniciada com sucesso. Sistemas operantes.');
+});
+</script>
+</body>
+</html>
