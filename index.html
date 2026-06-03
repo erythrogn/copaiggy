@@ -81,7 +81,7 @@ body {
     align-items: center;
     overflow-x: hidden;
     position: relative;
-    padding-bottom: var(--space-10);
+    padding-bottom: var(--space-4);
 }
 
 .intro-overlay {
@@ -236,6 +236,7 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
+    flex-grow: 1;
 }
 
 .header {
@@ -361,6 +362,16 @@ body {
     border-bottom: 1px solid var(--color-border-light);
     position: relative;
     z-index: 2;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.3s ease;
+    border-radius: var(--radius-md);
+    padding: var(--space-2) var(--space-3);
+    margin: calc(var(--space-2) * -1) calc(var(--space-3) * -1) var(--space-4);
+}
+
+.card-header:hover {
+    background: rgba(255, 255, 255, 0.03);
 }
 
 .card-title-group {
@@ -836,6 +847,32 @@ body {
     letter-spacing: 0.05em;
 }
 
+.footer-credit {
+    margin-top: var(--space-8);
+    padding-bottom: var(--space-4);
+    text-align: center;
+    font-size: 0.95rem;
+    color: var(--color-text-muted);
+    letter-spacing: 0.08em;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.footer-credit a {
+    color: var(--color-accent);
+    text-decoration: none;
+    font-weight: 700;
+    transition: color 0.3s ease, text-shadow 0.3s ease;
+}
+
+.footer-credit a:hover {
+    color: #ffffff;
+    text-shadow: 0 0 15px rgba(255, 208, 0, 0.6);
+}
+
 @media (max-width: 768px) {
     .form-row {
         flex-direction: column;
@@ -1032,6 +1069,10 @@ body {
             <div id="log-list" class="list-container"></div>
         </section>
     </main>
+    
+    <footer class="footer-credit">
+        by <a href="https://dimen-6.vercel.app/" target="_blank" rel="noopener noreferrer">@dimen6</a>
+    </footer>
 </div>
 
 <script type="module">
@@ -1167,7 +1208,7 @@ class AppState {
 
     async pushToRemote() {
         try { await setDoc(docRef, this.state); } 
-        catch (error) { console.error("Erro ao sincronizar com Firebase:", error); }
+        catch (error) { console.error("Erro ao sincronizar", error); }
     }
 
     subscribe(listener) { this.listeners.push(listener); }
@@ -1240,6 +1281,7 @@ class UIManager {
     constructor(stateManager, confettiEngine) {
         this.stateManager = stateManager;
         this.confetti = confettiEngine;
+        this.expandedTeams = new Set();
         this.elements = {
             tabs: document.querySelectorAll('.tab-button'),
             views: document.querySelectorAll('.view-container'),
@@ -1386,6 +1428,38 @@ class UIManager {
         gsap.from(this.elements.playersAdminList.children, { x: -20, opacity: 0, duration: 0.3, stagger: 0.04, ease: "power2.out" });
     }
 
+    toggleTeamCollapse(id) {
+        const wrap = document.getElementById(`collapse-${id}`);
+        const chevron = document.getElementById(`chevron-${id}`);
+        if (!wrap) return;
+
+        const isExpanded = this.expandedTeams.has(id);
+        if (isExpanded) {
+            this.expandedTeams.delete(id);
+            gsap.to(wrap, { 
+                height: 0, 
+                opacity: 0, 
+                duration: 0.3, 
+                ease: 'power2.inOut', 
+                onComplete: () => { wrap.style.display = 'none'; } 
+            });
+            if(chevron) gsap.to(chevron, { rotation: 0, duration: 0.3 });
+        } else {
+            this.expandedTeams.add(id);
+            wrap.style.display = 'block';
+            gsap.set(wrap, { height: 'auto' });
+            const targetHeight = wrap.offsetHeight;
+            gsap.fromTo(wrap, { height: 0, opacity: 0 }, { 
+                height: targetHeight, 
+                opacity: 1, 
+                duration: 0.3, 
+                ease: 'power2.out', 
+                onComplete: () => { wrap.style.height = 'auto'; } 
+            });
+            if(chevron) gsap.to(chevron, { rotation: 180, duration: 0.3 });
+        }
+    }
+
     fullRenderScoreboard(state) {
         this.elements.scoreboardTopContainer.innerHTML = '';
         this.elements.teamCardsGrid.innerHTML = '';
@@ -1407,13 +1481,42 @@ class UIManager {
             card.appendChild(cardBg);
 
             const header = this.createElement('div', ['card-header', 'dyn-border-bottom']);
+            header.addEventListener('click', () => this.toggleTeamCollapse(team.id));
+
             const titleGroup = this.createElement('div', ['card-title-group']);
             const svgIcon = this.createSVGIcon(team.icon, '20');
             svgIcon.classList.add('dyn-color');
             const title = this.createElement('h2', ['card-title', 'dyn-color']); title.textContent = team.name;
             titleGroup.append(svgIcon, title);
+            
+            const rightGroup = this.createElement('div');
+            rightGroup.style.display = 'flex';
+            rightGroup.style.alignItems = 'center';
+            rightGroup.style.gap = 'var(--space-4)';
+            
             const teamTotal = this.createElement('div', ['card-team-total'], { id: `card-total-${team.id}` }); teamTotal.textContent = '0';
-            header.append(titleGroup, teamTotal);
+            const chevron = this.createSVGIcon('chevron', '24');
+            chevron.id = `chevron-${team.id}`;
+            chevron.classList.add('dyn-color');
+            chevron.style.transition = 'transform 0.3s ease';
+            
+            rightGroup.append(teamTotal, chevron);
+            header.append(titleGroup, rightGroup);
+            
+            const listWrap = this.createElement('div', ['card-collapse-wrap'], { id: `collapse-${team.id}` });
+            listWrap.style.overflow = 'hidden';
+            
+            if (this.expandedTeams.has(team.id)) {
+                listWrap.style.height = 'auto';
+                listWrap.style.opacity = '1';
+                listWrap.style.display = 'block';
+                chevron.style.transform = 'rotate(180deg)';
+            } else {
+                listWrap.style.height = '0px';
+                listWrap.style.opacity = '0';
+                listWrap.style.display = 'none';
+                chevron.style.transform = 'rotate(0deg)';
+            }
             
             const list = this.createElement('div', ['list-container'], { id: `list-score-${team.id}` });
             
@@ -1450,7 +1553,8 @@ class UIManager {
                     list.appendChild(row);
                 });
             }
-            card.append(header, list);
+            listWrap.appendChild(list);
+            card.append(header, listWrap);
             this.elements.teamCardsGrid.appendChild(card);
         });
 
@@ -1528,7 +1632,9 @@ class UIManager {
             const rows = Array.from(list.querySelectorAll('.player-score-row'));
             if(rows.length <= 1) return;
 
-            const flipState = Flip.getState(rows);
+            const isVisible = this.expandedTeams.has(team.id);
+            let flipState = null;
+            if (animate && isVisible) flipState = Flip.getState(rows);
 
             rows.sort((a, b) => {
                 const idA = a.getAttribute('data-player-id');
@@ -1544,7 +1650,7 @@ class UIManager {
                 if(rankEl) rankEl.textContent = index + 1;
             });
 
-            if (animate) {
+            if (animate && isVisible && flipState) {
                 Flip.from(flipState, {
                     duration: 0.5,
                     ease: "power2.inOut",
@@ -1719,6 +1825,9 @@ class UIManager {
             const c1 = document.createElementNS('http://www.w3.org/2000/svg', 'circle'); c1.setAttribute('cx', '6'); c1.setAttribute('cy', '18'); c1.setAttribute('r', '3');
             const c2 = document.createElementNS('http://www.w3.org/2000/svg', 'circle'); c2.setAttribute('cx', '18'); c2.setAttribute('cy', '16'); c2.setAttribute('r', '3');
             svg.append(p, c1, c2);
+        } else if (type === 'chevron') {
+            const p = document.createElementNS('http://www.w3.org/2000/svg', 'polyline'); p.setAttribute('points', '6 9 12 15 18 9');
+            svg.appendChild(p);
         }
         return svg;
     }
