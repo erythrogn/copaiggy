@@ -78,14 +78,15 @@ body {
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: rgba(9, 14, 12, 0.95);
-    backdrop-filter: blur(10px);
+    background: rgba(9, 14, 12, 0.98);
+    backdrop-filter: blur(12px);
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 10000;
     overflow: hidden;
 }
+
 .intro-text {
     font-family: var(--font-heading);
     font-size: clamp(4rem, 15vw, 10rem);
@@ -95,6 +96,8 @@ body {
     white-space: nowrap;
     text-align: center;
     line-height: 0.9;
+    opacity: 0;
+    visibility: hidden; /* Previne o FOUC - Flash of Unstyled Content */
 }
 
 #canvas-confetti { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 9999; }
@@ -786,7 +789,7 @@ class UIManager {
     fullRenderLogs(state) {
         this.elements.logList.innerHTML = '';
         if (state.logs.length === 0) {
-            this.renderEmptyState(this.elements.logList, 'Nenhum registro.');
+            this.renderEmptyState(this.elements.logList, 'Nenhum registo.');
             return;
         }
         const sortedLogs = [...state.logs].sort((a,b) => b.id.localeCompare(a.id));
@@ -996,8 +999,11 @@ class UIManager {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    
     const introOverlay = document.getElementById('intro-overlay');
     const introText = document.querySelector('.intro-text');
+
+    gsap.set(introText, { visibility: 'visible', opacity: 0, y: 40, scale: 0.95 });
 
     const tlIntro = gsap.timeline({
         onComplete: () => {
@@ -1005,34 +1011,35 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    gsap.set(introText, { x: '-150vw', skewX: 20 });
-
     tlIntro.to(introText, {
-        x: '0vw',
-        skewX: 0,
-        duration: 0.8,
+        opacity: 1,
+        y: 0,
+        scale: 1,
+        duration: 1.2,
         ease: 'power4.out'
     })
     .to(introText, {
-        scale: 1.15,
-        duration: 1.4,
-        ease: 'none'
+        scale: 1.05,
+        duration: 1.5,
+        ease: 'sine.inOut'
     })
     .to(introText, {
-        x: '150vw',
-        skewX: -20,
-        duration: 0.6,
-        ease: 'power4.in'
+        opacity: 0,
+        y: -30,
+        scale: 1.1,
+        duration: 0.8,
+        ease: 'power3.in'
     })
     .to(introOverlay, {
         opacity: 0,
-        duration: 0.4
+        duration: 0.6,
+        ease: 'power2.inOut'
     }, "-=0.4");
 
     const appState = new AppState();
     const confettiEngine = new ConfettiEngine('canvas-confetti');
     const uiManager = new UIManager(appState, confettiEngine);
-    console.log('Firebase e Motor de Escalabilidade Conectados.');
+    
 });
 </script>
 </body>
