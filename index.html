@@ -75,6 +75,32 @@ body {
     padding-bottom: var(--space-10);
 }
 
+/* ─── ANIMAÇÃO DE ENTRADA ─── */
+.intro-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(9, 14, 12, 0.95);
+    backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    overflow: hidden;
+}
+.intro-text {
+    font-family: var(--font-heading);
+    font-size: clamp(4rem, 15vw, 10rem);
+    color: var(--color-accent);
+    text-transform: uppercase;
+    text-shadow: 0 0 40px rgba(245, 200, 0, 0.5);
+    white-space: nowrap;
+    text-align: center;
+    line-height: 0.9;
+}
+
 #canvas-confetti { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 9999; }
 .toast-container { position: fixed; bottom: var(--space-4); right: var(--space-4); display: flex; flex-direction: column; gap: var(--space-2); z-index: 9000; pointer-events: none; }
 .toast { background-color: var(--color-surface); border: 1px solid var(--color-border-light); color: var(--color-text-main); padding: var(--space-3) var(--space-4); border-radius: var(--radius-sm); font-weight: 600; letter-spacing: 0.05em; display: flex; align-items: center; gap: var(--space-3); box-shadow: var(--shadow-card); pointer-events: auto; }
@@ -175,6 +201,12 @@ body {
 </style>
 </head>
 <body>
+
+<!-- OVERLAY DE INTRODUÇÃO -->
+<div id="intro-overlay" class="intro-overlay">
+    <h1 class="intro-text">Copa da<br>Iggy Azaketty</h1>
+</div>
+
 <canvas id="canvas-confetti"></canvas>
 <div id="toast-root" class="toast-container"></div>
 <div id="modal-root" class="modal-overlay"></div>
@@ -892,6 +924,41 @@ class UIManager {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Inicialização da Animação de Abertura
+    const introOverlay = document.getElementById('intro-overlay');
+    const introText = document.querySelector('.intro-text');
+
+    const tlIntro = gsap.timeline({
+        onComplete: () => {
+            introOverlay.style.display = 'none';
+        }
+    });
+
+    gsap.set(introText, { x: '-150vw', skewX: 20 });
+
+    tlIntro.to(introText, {
+        x: '0vw',
+        skewX: 0,
+        duration: 0.8,
+        ease: 'power4.out'
+    })
+    .to(introText, {
+        scale: 1.15,
+        duration: 1.4,
+        ease: 'none'
+    })
+    .to(introText, {
+        x: '150vw',
+        skewX: -20,
+        duration: 0.6,
+        ease: 'power4.in'
+    })
+    .to(introOverlay, {
+        opacity: 0,
+        duration: 0.4
+    }, "-=0.4");
+
+    // Inicialização do Core do Sistema
     const appState = new AppState();
     const confettiEngine = new ConfettiEngine('canvas-confetti');
     const uiManager = new UIManager(appState, confettiEngine);
