@@ -675,6 +675,92 @@ class UIManager {
         } else if (type === 'chevron') {
             const p = document.createElementNS('http://www.w3.org/2000/svg', 'polyline'); p.setAttribute('points', '6 9 12 15 18 9');
             svg.appendChild(p);
+        } else if (type === 'rainbow') {
+            const p1 = document.createElementNS('http://www.w3.org/2000/svg', 'path'); p1.setAttribute('d', 'M4 18a8 8 0 0 1 16 0');
+            const p2 = document.createElementNS('http://www.w3.org/2000/svg', 'path'); p2.setAttribute('d', 'M7 18a5 5 0 0 1 10 0');
+            const p3 = document.createElementNS('http://www.w3.org/2000/svg', 'path'); p3.setAttribute('d', 'M10 18a2 2 0 0 1 4 0');
+            svg.append(p1, p2, p3);
+        } else if (type === 'trans') {
+            const p1 = document.createElementNS('http://www.w3.org/2000/svg', 'circle'); p1.setAttribute('cx', '12'); p1.setAttribute('cy', '12'); p1.setAttribute('r', '4');
+            const p2 = document.createElementNS('http://www.w3.org/2000/svg', 'line'); p2.setAttribute('x1', '12'); p2.setAttribute('y1', '8'); p2.setAttribute('x2', '12'); p2.setAttribute('y2', '2');
+            const p3 = document.createElementNS('http://www.w3.org/2000/svg', 'line'); p3.setAttribute('x1', '9'); p3.setAttribute('y1', '4'); p3.setAttribute('x2', '15'); p3.setAttribute('y2', '4');
+            const p4 = document.createElementNS('http://www.w3.org/2000/svg', 'line'); p4.setAttribute('x1', '14.8'); p4.setAttribute('y1', '9.2'); p4.setAttribute('x2', '19.5'); p4.setAttribute('y2', '4.5');
+            const p5 = document.createElementNS('http://www.w3.org/2000/svg', 'polyline'); p5.setAttribute('points', '15 4 19.5 4 19.5 8.5');
+            const p6 = document.createElementNS('http://www.w3.org/2000/svg', 'line'); p6.setAttribute('x1', '16.5'); p6.setAttribute('y1', '5.5'); p6.setAttribute('x2', '18.5'); p6.setAttribute('y2', '7.5');
+            const p7 = document.createElementNS('http://www.w3.org/2000/svg', 'line'); p7.setAttribute('x1', '9.2'); p7.setAttribute('y1', '9.2'); p7.setAttribute('x2', '4.5'); p7.setAttribute('y2', '4.5');
+            const p8 = document.createElementNS('http://www.w3.org/2000/svg', 'polyline'); p8.setAttribute('points', '4.5 7.5 4.5 4.5 7.5 4.5');
+            svg.append(p1, p2, p3, p4, p5, p6, p7, p8);
+        } else if (type === 'mars-mars') {
+            const p1 = document.createElementNS('http://www.w3.org/2000/svg', 'circle'); p1.setAttribute('cx', '9'); p1.setAttribute('cy', '14'); p1.setAttribute('r', '4');
+            const p2 = document.createElementNS('http://www.w3.org/2000/svg', 'line'); p2.setAttribute('x1', '11.8'); p2.setAttribute('y1', '11.2'); p2.setAttribute('x2', '16.5'); p2.setAttribute('y2', '6.5');
+            const p3 = document.createElementNS('http://www.w3.org/2000/svg', 'polyline'); p3.setAttribute('points', '12.5 6.5 16.5 6.5 16.5 10.5');
+            const p4 = document.createElementNS('http://www.w3.org/2000/svg', 'circle'); p4.setAttribute('cx', '15'); p4.setAttribute('cy', '10'); p4.setAttribute('r', '4');
+            const p5 = document.createElementNS('http://www.w3.org/2000/svg', 'line'); p5.setAttribute('x1', '17.8'); p5.setAttribute('y1', '7.2'); p5.setAttribute('x2', '21.5'); p5.setAttribute('y2', '3.5');
+            const p6 = document.createElementNS('http://www.w3.org/2000/svg', 'polyline'); p6.setAttribute('points', '17.5 3.5 21.5 3.5 21.5 7.5');
+            svg.append(p1, p2, p3, p4, p5, p6);
+        } else if (type === 'venus-venus') {
+            const p1 = document.createElementNS('http://www.w3.org/2000/svg', 'circle'); p1.setAttribute('cx', '9'); p1.setAttribute('cy', '8'); p1.setAttribute('r', '4');
+            const p2 = document.createElementNS('http://www.w3.org/2000/svg', 'line'); p2.setAttribute('x1', '9'); p2.setAttribute('y1', '12'); p2.setAttribute('x2', '9'); p2.setAttribute('y2', '19');
+            const p3 = document.createElementNS('http://www.w3.org/2000/svg', 'line'); p3.setAttribute('x1', '6.5'); p3.setAttribute('y1', '15.5'); p3.setAttribute('x2', '11.5'); p3.setAttribute('y2', '15.5');
+            const p4 = document.createElementNS('http://www.w3.org/2000/svg', 'circle'); p4.setAttribute('cx', '15'); p4.setAttribute('cy', '8'); p4.setAttribute('r', '4');
+            const p5 = document.createElementNS('http://www.w3.org/2000/svg', 'line'); p5.setAttribute('x1', '15'); p5.setAttribute('y1', '12'); p5.setAttribute('x2', '15'); p5.setAttribute('y2', '19');
+            const p6 = document.createElementNS('http://www.w3.org/2000/svg', 'line'); p6.setAttribute('x1', '12.5'); p6.setAttribute('y1', '15.5'); p6.setAttribute('x2', '17.5'); p6.setAttribute('y2', '15.5');
+            svg.append(p1, p2, p3, p4, p5, p6);
+        } else if (type === 'infinity-heart') {
+            const p1 = document.createElementNS('http://www.w3.org/2000/svg', 'path'); p1.setAttribute('d', 'M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z');
+            const p2 = document.createElementNS('http://www.w3.org/2000/svg', 'path'); p2.setAttribute('d', 'M7 12a2.5 2.5 0 0 1 5 0c0 2.5-5 2.5-5 5a2.5 2.5 0 0 1 5 0c0-2.5-5-2.5-5-5z');
+            p2.setAttribute('transform', 'matrix(1 0 0 1 2.5 -0.5)');
+            svg.append(p1, p2);
+        } else if (type === 'martini') {
+            const p1 = document.createElementNS('http://www.w3.org/2000/svg', 'path'); p1.setAttribute('d', 'M8 22h8');
+            const p2 = document.createElementNS('http://www.w3.org/2000/svg', 'path'); p2.setAttribute('d', 'M12 11v11');
+            const p3 = document.createElementNS('http://www.w3.org/2000/svg', 'path'); p3.setAttribute('d', 'm19 3-7 8-7-8Z');
+            svg.append(p1, p2, p3);
+        } else if (type === 'gamepad') {
+            const r = document.createElementNS('http://www.w3.org/2000/svg', 'rect'); r.setAttribute('x', '2'); r.setAttribute('y', '6'); r.setAttribute('width', '20'); r.setAttribute('height', '12'); r.setAttribute('rx', '2');
+            const p1 = document.createElementNS('http://www.w3.org/2000/svg', 'path'); p1.setAttribute('d', 'M6 12h4');
+            const p2 = document.createElementNS('http://www.w3.org/2000/svg', 'path'); p2.setAttribute('d', 'M8 10v4');
+            const l1 = document.createElementNS('http://www.w3.org/2000/svg', 'line'); l1.setAttribute('x1', '15'); l1.setAttribute('y1', '13'); l1.setAttribute('x2', '15.01'); l1.setAttribute('y2', '13');
+            const l2 = document.createElementNS('http://www.w3.org/2000/svg', 'line'); l2.setAttribute('x1', '18'); l2.setAttribute('y1', '11'); l2.setAttribute('x2', '18.01'); l2.setAttribute('y2', '11');
+            svg.append(r, p1, p2, l1, l2);
+        } else if (type === 'diamond') {
+            const p1 = document.createElementNS('http://www.w3.org/2000/svg', 'path'); p1.setAttribute('d', 'M6 3h12l4 6-10 13L2 9Z');
+            const p2 = document.createElementNS('http://www.w3.org/2000/svg', 'path'); p2.setAttribute('d', 'M11 3 8 9l4 13');
+            const p3 = document.createElementNS('http://www.w3.org/2000/svg', 'path'); p3.setAttribute('d', 'M12.5 3l3 6-4 13');
+            svg.append(p1, p2, p3);
+        } else if (type === 'bomb') {
+            const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle'); c.setAttribute('cx', '12'); c.setAttribute('cy', '13'); c.setAttribute('r', '8');
+            const p1 = document.createElementNS('http://www.w3.org/2000/svg', 'path'); p1.setAttribute('d', 'M12 5v-2');
+            const p2 = document.createElementNS('http://www.w3.org/2000/svg', 'path'); p2.setAttribute('d', 'M14 2h-4');
+            const p3 = document.createElementNS('http://www.w3.org/2000/svg', 'path'); p3.setAttribute('d', 'M16 4l-2 2');
+            svg.append(c, p1, p2, p3);
+        } else if (type === 'droplet') {
+            const p = document.createElementNS('http://www.w3.org/2000/svg', 'path'); p.setAttribute('d', 'M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z');
+            svg.appendChild(p);
+        } else if (type === 'eye') {
+            const p = document.createElementNS('http://www.w3.org/2000/svg', 'path'); p.setAttribute('d', 'M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z');
+            const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle'); c.setAttribute('cx', '12'); c.setAttribute('cy', '12'); c.setAttribute('r', '3');
+            svg.append(p, c);
+        } else if (type === 'key') {
+            const p = document.createElementNS('http://www.w3.org/2000/svg', 'path'); p.setAttribute('d', 'M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4');
+            svg.appendChild(p);
+        } else if (type === 'alien') {
+            const p = document.createElementNS('http://www.w3.org/2000/svg', 'path'); p.setAttribute('d', 'M12 2c-4.4 0-8 4.2-8 9 0 3 2 7 8 11 6-4 8-8 8-11 0-4.8-3.6-9-8-9z');
+            const c1 = document.createElementNS('http://www.w3.org/2000/svg', 'circle'); c1.setAttribute('cx', '8'); c1.setAttribute('cy', '13'); c1.setAttribute('r', '2');
+            const c2 = document.createElementNS('http://www.w3.org/2000/svg', 'circle'); c2.setAttribute('cx', '16'); c2.setAttribute('cy', '13'); c2.setAttribute('r', '2');
+            svg.append(p, c1, c2);
+        } else if (type === 'paw') {
+            const p1 = document.createElementNS('http://www.w3.org/2000/svg', 'path'); p1.setAttribute('d', 'M11 11.083c.85-.355 1.7-.583 2.5-.583.85 0 1.7.228 2.5.583a4 4 0 1 1-5 0Z');
+            const p2 = document.createElementNS('http://www.w3.org/2000/svg', 'path'); p2.setAttribute('d', 'M6 13a4 4 0 1 1-4-4 4 4 0 0 1 4 4Z');
+            const p3 = document.createElementNS('http://www.w3.org/2000/svg', 'path'); p3.setAttribute('d', 'M14 6a4 4 0 1 1-4-4 4 4 0 0 1 4 4Z');
+            const p4 = document.createElementNS('http://www.w3.org/2000/svg', 'path'); p4.setAttribute('d', 'M22 13a4 4 0 1 1-4-4 4 4 0 0 1 4 4Z');
+            svg.append(p1, p2, p3, p4);
+        } else if (type === 'rocket') {
+            const p1 = document.createElementNS('http://www.w3.org/2000/svg', 'path'); p1.setAttribute('d', 'M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z');
+            const p2 = document.createElementNS('http://www.w3.org/2000/svg', 'path'); p2.setAttribute('d', 'm12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z');
+            const p3 = document.createElementNS('http://www.w3.org/2000/svg', 'path'); p3.setAttribute('d', 'M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0');
+            const p4 = document.createElementNS('http://www.w3.org/2000/svg', 'path'); p4.setAttribute('d', 'M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5');
+            svg.append(p1, p2, p3, p4);
         }
         return svg;
     }

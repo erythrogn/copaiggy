@@ -55,8 +55,6 @@
     </nav>
 
     <main id="view-cadastro" class="view-container">
-        
-        <!-- CARD DE AUTENTICAÇÃO -->
         <section id="admin-auth-card" class="card auth-card">
             <div class="auth-icon">
                 <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -72,7 +70,6 @@
             </div>
         </section>
 
-        <!-- CONTEÚDO ADMIN (OCULTO POR PADRÃO) -->
         <div id="admin-content-wrap" class="admin-content-wrap">
             <section class="card">
                 <div class="card-header">
@@ -105,24 +102,45 @@
                     <div class="form-group">
                         <label class="form-label">Ícone</label>
                         <select id="select-new-team-icon" class="form-select">
-                            <option value="shield">Escudo</option>
-                            <option value="crown">Coroa</option>
-                            <option value="sword">Espada</option>
-                            <option value="star">Estrela</option>
-                            <option value="zap">Raio</option>
-                            <option value="flame">Fogo</option>
-                            <option value="heart">Coração</option>
-                            <option value="skull">Caveira</option>
-                            <option value="ghost">Fantasma</option>
-                            <option value="moon">Lua</option>
-                            <option value="sun">Sol</option>
-                            <option value="anchor">Âncora</option>
-                            <option value="target">Alvo</option>
-                            <option value="award">Prêmio</option>
-                            <option value="flag">Bandeira</option>
-                            <option value="crosshair">Mira</option>
-                            <option value="coffee">Café</option>
-                            <option value="music">Música</option>
+                            <optgroup label="Símbolos LGBT+">
+                                <option value="rainbow">Arco-íris</option>
+                                <option value="trans">Transgênero</option>
+                                <option value="mars-mars">Marte duplo (G&B)</option>
+                                <option value="venus-venus">Vênus duplo (L&B)</option>
+                                <option value="infinity-heart">Poli (Infinito + Coração)</option>
+                            </optgroup>
+                            <optgroup label="Especiais">
+                                <option value="martini">Taça (Drink)</option>
+                                <option value="gamepad">Controle (Gamer)</option>
+                                <option value="rocket">Foguete</option>
+                                <option value="diamond">Diamante</option>
+                                <option value="bomb">Bomba</option>
+                                <option value="droplet">Gota (Água/Suor)</option>
+                                <option value="paw">Patinha (Pet)</option>
+                                <option value="alien">Alien</option>
+                                <option value="eye">Olho</option>
+                                <option value="key">Chave</option>
+                            </optgroup>
+                            <optgroup label="Símbolos Clássicos">
+                                <option value="shield">Escudo</option>
+                                <option value="crown">Coroa</option>
+                                <option value="sword">Espada</option>
+                                <option value="star">Estrela</option>
+                                <option value="zap">Raio</option>
+                                <option value="flame">Fogo</option>
+                                <option value="heart">Coração Base</option>
+                                <option value="skull">Caveira</option>
+                                <option value="ghost">Fantasma</option>
+                                <option value="moon">Lua</option>
+                                <option value="sun">Sol</option>
+                                <option value="anchor">Âncora</option>
+                                <option value="target">Alvo</option>
+                                <option value="award">Prêmio</option>
+                                <option value="flag">Bandeira</option>
+                                <option value="crosshair">Mira</option>
+                                <option value="coffee">Café</option>
+                                <option value="music">Música</option>
+                            </optgroup>
                         </select>
                     </div>
                     <button id="btn-add-team" class="btn btn-primary" style="height: 52px;">Adicionar</button>
