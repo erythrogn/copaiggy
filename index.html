@@ -72,32 +72,44 @@ body {
     padding-bottom: var(--space-10);
 }
 
+/* ─── ANIMAÇÃO DE ENTRADA CINEMATOGRÁFICA ─── */
 .intro-overlay {
     position: fixed;
     top: 0;
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: rgba(9, 14, 12, 0.98);
-    backdrop-filter: blur(12px);
+    background: radial-gradient(circle at center, #111a16 0%, #090e0c 100%);
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 10000;
     overflow: hidden;
 }
-
+.broadcast-line {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    height: 6px;
+    background: var(--color-accent);
+    transform: translateY(-50%) scaleX(0);
+    transform-origin: left;
+    box-shadow: 0 0 30px var(--color-accent);
+    z-index: 1;
+}
 .intro-text {
     font-family: var(--font-heading);
-    font-size: clamp(4rem, 15vw, 10rem);
-    color: var(--color-accent);
+    font-size: clamp(3.5rem, 12vw, 8rem);
+    color: #ffffff;
     text-transform: uppercase;
-    text-shadow: 0 0 40px rgba(245, 200, 0, 0.5);
+    text-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 40px rgba(245, 200, 0, 0.3);
     white-space: nowrap;
     text-align: center;
-    line-height: 0.9;
-    opacity: 0;
-    visibility: hidden; /* Previne o FOUC - Flash of Unstyled Content */
+    line-height: 0.95;
+    letter-spacing: 0.02em;
+    visibility: hidden; /* FOUC Fix */
+    z-index: 2;
 }
 
 #canvas-confetti { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 9999; }
@@ -202,6 +214,7 @@ body {
 <body>
 
 <div id="intro-overlay" class="intro-overlay">
+    <div class="broadcast-line"></div>
     <h1 class="intro-text">Copa da<br>Iggy Azaketty</h1>
 </div>
 
@@ -789,7 +802,7 @@ class UIManager {
     fullRenderLogs(state) {
         this.elements.logList.innerHTML = '';
         if (state.logs.length === 0) {
-            this.renderEmptyState(this.elements.logList, 'Nenhum registo.');
+            this.renderEmptyState(this.elements.logList, 'Nenhum registro.');
             return;
         }
         const sortedLogs = [...state.logs].sort((a,b) => b.id.localeCompare(a.id));
@@ -1002,8 +1015,10 @@ document.addEventListener('DOMContentLoaded', () => {
     
     const introOverlay = document.getElementById('intro-overlay');
     const introText = document.querySelector('.intro-text');
+    const broadcastLine = document.querySelector('.broadcast-line');
 
-    gsap.set(introText, { visibility: 'visible', opacity: 0, y: 40, scale: 0.95 });
+    gsap.set(introText, { visibility: 'visible', x: '-100vw', opacity: 0 });
+    gsap.set(broadcastLine, { scaleX: 0, transformOrigin: 'left' });
 
     const tlIntro = gsap.timeline({
         onComplete: () => {
@@ -1011,30 +1026,39 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    tlIntro.to(introText, {
-        opacity: 1,
-        y: 0,
-        scale: 1,
-        duration: 1.2,
-        ease: 'power4.out'
-    })
-    .to(introText, {
-        scale: 1.05,
-        duration: 1.5,
-        ease: 'sine.inOut'
-    })
-    .to(introText, {
-        opacity: 0,
-        y: -30,
-        scale: 1.1,
+    tlIntro.to(broadcastLine, {
+        scaleX: 1,
         duration: 0.8,
-        ease: 'power3.in'
+        ease: "expo.inOut"
     })
+    .to(introText, {
+        x: '0vw',
+        opacity: 1,
+        duration: 1.2,
+        ease: "expo.out"
+    }, "-=0.3")
+    .to(introText, {
+        x: '3vw',
+        duration: 2,
+        ease: "sine.inOut"
+    }, "-=0.8")
+    .to(introText, {
+        x: '100vw',
+        opacity: 0,
+        duration: 0.8,
+        ease: "expo.in"
+    })
+    .to(broadcastLine, {
+        scaleX: 0,
+        transformOrigin: 'right',
+        duration: 0.6,
+        ease: "expo.inOut"
+    }, "-=0.6")
     .to(introOverlay, {
         opacity: 0,
-        duration: 0.6,
-        ease: 'power2.inOut'
-    }, "-=0.4");
+        duration: 0.5,
+        ease: "power2.inOut"
+    }, "-=0.2");
 
     const appState = new AppState();
     const confettiEngine = new ConfettiEngine('canvas-confetti');
