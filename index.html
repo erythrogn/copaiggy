@@ -8,16 +8,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <style>
 :root {
-    --color-primary: #00b140;
-    --color-primary-dark: #007a2c;
-    --color-primary-alpha: rgba(0, 177, 64, 0.15);
-    --color-secondary: #1a52c8;
-    --color-secondary-dark: #0f368a;
-    --color-secondary-alpha: rgba(26, 82, 200, 0.15);
-    --color-accent: #f5c800;
-    --color-accent-alpha: rgba(245, 200, 0, 0.12);
-    --color-danger: #cc2200;
-    --color-danger-alpha: rgba(204, 34, 0, 0.15);
     --color-bg: #090e0c;
     --color-surface: #111a16;
     --color-surface-hover: #16241e;
@@ -26,6 +16,14 @@
     --color-text-main: #f4f5f5;
     --color-text-muted: #9ba8a2;
     --color-text-disabled: #5a6b63;
+    
+    /* Cores do Sistema Base */
+    --color-danger: #cc2200;
+    --color-danger-alpha: rgba(204, 34, 0, 0.15);
+    --color-accent: #f5c800;
+    --color-accent-alpha: rgba(245, 200, 0, 0.12);
+
+    /* Medidas e Tipografia */
     --radius-sm: 6px;
     --radius-md: 10px;
     --radius-lg: 16px;
@@ -40,26 +38,32 @@
     --space-10: 64px;
     --font-heading: 'Anton', sans-serif;
     --font-body: 'Barlow Condensed', sans-serif;
-    --shadow-glow-primary: 0 0 24px rgba(0, 177, 64, 0.3);
-    --shadow-glow-secondary: 0 0 24px rgba(26, 82, 200, 0.3);
-    --shadow-glow-accent: 0 0 32px rgba(245, 200, 0, 0.4);
     --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.4);
 }
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-    -webkit-tap-highlight-color: transparent;
-}
-html {
-    font-size: 16px;
-    scroll-behavior: smooth;
-}
+
+/* ─── TEMAS DINÂMICOS ─── */
+.theme-verde    { --c-main: #00b140; --c-alpha: rgba(0, 177, 64, 0.15); }
+.theme-amarelo  { --c-main: #f5c800; --c-alpha: rgba(245, 200, 0, 0.15); }
+.theme-azul     { --c-main: #1a52c8; --c-alpha: rgba(26, 82, 200, 0.15); }
+.theme-vermelho { --c-main: #e11d48; --c-alpha: rgba(225, 29, 72, 0.15); }
+.theme-roxo     { --c-main: #a855f7; --c-alpha: rgba(168, 85, 247, 0.15); }
+.theme-laranja  { --c-main: #f97316; --c-alpha: rgba(249, 115, 22, 0.15); }
+.theme-rosa     { --c-main: #ec4899; --c-alpha: rgba(236, 72, 153, 0.15); }
+
+.dyn-color         { color: var(--c-main); }
+.dyn-bg            { background-color: var(--c-alpha); }
+.dyn-border        { border-color: var(--c-alpha); }
+.dyn-border-solid  { border-color: var(--c-main); }
+.dyn-shadow        { text-shadow: 0 0 24px var(--c-alpha); }
+.dyn-glow          { box-shadow: 0 0 24px var(--c-alpha); }
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html { font-size: 16px; scroll-behavior: smooth; }
 body {
     background-color: var(--color-bg);
     background-image: 
-        radial-gradient(circle at 50% 0%, rgba(0, 177, 64, 0.08) 0%, transparent 50%),
-        radial-gradient(circle at 100% 100%, rgba(26, 82, 200, 0.05) 0%, transparent 50%);
+        radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.02) 0%, transparent 50%),
+        radial-gradient(circle at 100% 100%, rgba(255, 255, 255, 0.01) 0%, transparent 50%);
     color: var(--color-text-main);
     font-family: var(--font-body);
     min-height: 100vh;
@@ -70,649 +74,103 @@ body {
     position: relative;
     padding-bottom: var(--space-10);
 }
-#canvas-confetti {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    pointer-events: none;
-    z-index: 9999;
-}
-.toast-container {
-    position: fixed;
-    bottom: var(--space-4);
-    right: var(--space-4);
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-2);
-    z-index: 9000;
-    pointer-events: none;
-}
-.toast {
-    background-color: var(--color-surface);
-    border: 1px solid var(--color-border-light);
-    color: var(--color-text-main);
-    padding: var(--space-3) var(--space-4);
-    border-radius: var(--radius-sm);
-    font-weight: 600;
-    letter-spacing: 0.05em;
-    display: flex;
-    align-items: center;
-    gap: var(--space-3);
-    box-shadow: var(--shadow-card);
-    pointer-events: auto;
-}
-.toast-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-.toast.success .toast-icon {
-    color: var(--color-primary);
-}
-.toast.danger .toast-icon {
-    color: var(--color-danger);
-}
-.modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(0, 0, 0, 0.8);
-    backdrop-filter: blur(8px);
-    z-index: 9500;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    pointer-events: none;
-}
-.modal-overlay.active {
-    opacity: 1;
-    pointer-events: auto;
-}
-.modal-content {
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    padding: var(--space-6);
-    width: 90%;
-    max-width: 400px;
-    box-shadow: var(--shadow-card);
-    transform: translateY(20px);
-}
-.modal-header {
-    display: flex;
-    align-items: center;
-    gap: var(--space-3);
-    margin-bottom: var(--space-4);
-}
-.modal-title {
-    font-size: 1.25rem;
-    font-weight: 700;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-}
-.modal-body {
-    color: var(--color-text-muted);
-    font-size: 1.1rem;
-    line-height: 1.5;
-    margin-bottom: var(--space-5);
-}
-.modal-actions {
-    display: flex;
-    gap: var(--space-3);
-    justify-content: flex-end;
-}
-.container {
-    width: 100%;
-    max-width: 768px;
-    padding: 0 var(--space-4);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-.header {
-    width: 100%;
-    text-align: center;
-    padding: var(--space-8) 0 var(--space-6) 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-.header-badge {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-2);
-    background: var(--color-accent-alpha);
-    border: 1px solid rgba(245, 200, 0, 0.2);
-    color: var(--color-accent);
-    padding: var(--space-1) var(--space-3);
-    border-radius: var(--radius-sm);
-    font-size: 0.85rem;
-    font-weight: 700;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    margin-bottom: var(--space-4);
-}
-.header-title {
-    font-family: var(--font-heading);
-    font-size: clamp(3rem, 10vw, 6rem);
-    line-height: 0.9;
-    letter-spacing: 0.02em;
-    text-transform: uppercase;
-    color: var(--color-text-main);
-    margin-bottom: var(--space-2);
-}
-.header-title span {
-    color: var(--color-accent);
-}
-.header-subtitle {
-    color: var(--color-text-muted);
-    font-size: 1.2rem;
-    letter-spacing: 0.08em;
-}
-.tabs-container {
-    display: flex;
-    width: 100%;
-    max-width: 500px;
-    background: rgba(0, 0, 0, 0.6);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    overflow: hidden;
-    margin-bottom: var(--space-6);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-}
-.tab-button {
-    flex: 1;
-    background: transparent;
-    border: none;
-    border-bottom: 2px solid transparent;
-    color: var(--color-text-muted);
-    font-family: var(--font-body);
-    font-size: 1.1rem;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    padding: var(--space-3) 0;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-2);
-    transition: background-color 0.3s ease, color 0.3s ease;
-    outline: none;
-}
-.tab-button:hover {
-    background: var(--color-surface);
-    color: var(--color-text-main);
-}
-.tab-button.active {
-    background: var(--color-primary-alpha);
-    color: var(--color-primary);
-    border-bottom-color: var(--color-primary);
-}
-.view-container {
-    width: 100%;
-    display: none;
-    flex-direction: column;
-    gap: var(--space-4);
-}
-.view-container.active {
-    display: flex;
-}
-.card {
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    padding: var(--space-5);
-    width: 100%;
-    box-shadow: var(--shadow-card);
-}
-.card-header {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-    margin-bottom: var(--space-4);
-    padding-bottom: var(--space-3);
-    border-bottom: 1px solid var(--color-border-light);
-}
-.card-title {
-    font-size: 1.1rem;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--color-text-muted);
-}
-.grid-2 {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--space-4);
-}
-.form-group {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-2);
-}
-.form-label {
-    font-size: 0.9rem;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--color-text-muted);
-}
-.form-label.color-a {
-    color: var(--color-primary);
-}
-.form-label.color-b {
-    color: var(--color-secondary);
-}
-.form-input, .form-select {
-    background: rgba(0, 0, 0, 0.5);
-    border: 1px solid var(--color-border-light);
-    border-radius: var(--radius-sm);
-    color: var(--color-text-main);
-    font-family: var(--font-body);
-    font-size: 1.1rem;
-    padding: var(--space-3);
-    outline: none;
-    transition: border-color 0.3s ease, box-shadow 0.3s ease;
-    width: 100%;
-}
-.form-input:focus, .form-select:focus {
-    border-color: var(--color-primary);
-    box-shadow: var(--shadow-glow-primary);
-}
-.form-input.large {
-    font-family: var(--font-heading);
-    font-size: 1.5rem;
-    letter-spacing: 0.05em;
-    padding: var(--space-2) var(--space-3);
-}
-.form-select option {
-    background: var(--color-surface);
-    color: var(--color-text-main);
-}
-.form-row {
-    display: flex;
-    gap: var(--space-3);
-    align-items: flex-end;
-    flex-wrap: wrap;
-}
-.form-row .form-group {
-    flex: 1;
-    min-width: 150px;
-}
-.btn {
-    border: none;
-    border-radius: var(--radius-sm);
-    font-family: var(--font-body);
-    font-size: 1.1rem;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-2);
-    transition: transform 0.1s ease, filter 0.3s ease;
-    outline: none;
-}
-.btn:active {
-    transform: scale(0.95);
-}
-.btn-primary {
-    background: var(--color-primary);
-    color: var(--color-bg);
-    padding: var(--space-3) var(--space-5);
-    height: 48px;
-}
-.btn-primary:hover {
-    background: var(--color-primary-dark);
-}
-.btn-danger {
-    background: var(--color-danger);
-    color: var(--color-text-main);
-    padding: var(--space-3) var(--space-5);
-}
-.btn-outline {
-    background: transparent;
-    border: 1px solid var(--color-border-light);
-    color: var(--color-text-muted);
-    padding: var(--space-2) var(--space-4);
-    font-size: 0.9rem;
-}
-.btn-outline:hover {
-    border-color: var(--color-text-main);
-    color: var(--color-text-main);
-}
-.btn-icon {
-    background: transparent;
-    border: 1px solid var(--color-border-light);
-    color: var(--color-text-muted);
-    width: 36px;
-    height: 36px;
-    border-radius: var(--radius-sm);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
-}
-.btn-icon:hover {
-    background: var(--color-surface-hover);
-    color: var(--color-text-main);
-}
-.btn-icon.danger:hover {
-    border-color: var(--color-danger);
-    color: var(--color-danger);
-    background: var(--color-danger-alpha);
-}
-.btn-action {
-    background: transparent;
-    border: 1px solid var(--color-primary-alpha);
-    color: var(--color-primary);
-    width: 36px;
-    height: 36px;
-    border-radius: var(--radius-sm);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-.btn-action:hover {
-    background: var(--color-primary-alpha);
-}
-.btn-action.minus {
-    border-color: var(--color-danger-alpha);
-    color: var(--color-danger);
-}
-.btn-action.minus:hover {
-    background: var(--color-danger-alpha);
-}
-.btn-action.blue {
-    border-color: var(--color-secondary-alpha);
-    color: var(--color-secondary);
-}
-.btn-action.blue:hover {
-    background: var(--color-secondary-alpha);
-}
-.list-container {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-2);
-    max-height: 400px;
-    overflow-y: auto;
-    padding-right: var(--space-2);
-}
-.list-container::-webkit-scrollbar {
-    width: 4px;
-}
-.list-container::-webkit-scrollbar-track {
-    background: rgba(0, 0, 0, 0.2);
-    border-radius: var(--radius-sm);
-}
-.list-container::-webkit-scrollbar-thumb {
-    background: var(--color-border-light);
-    border-radius: var(--radius-sm);
-}
-.list-item {
-    background: rgba(0, 0, 0, 0.4);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-sm);
-    padding: var(--space-3) var(--space-4);
-    display: flex;
-    align-items: center;
-    gap: var(--space-3);
-    will-change: transform, opacity;
-}
-.avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: var(--radius-full);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-}
-.avatar.team-a {
-    background: var(--color-primary-alpha);
-    border: 1px solid var(--color-primary);
-    color: var(--color-primary);
-}
-.avatar.team-b {
-    background: var(--color-secondary-alpha);
-    border: 1px solid var(--color-secondary);
-    color: var(--color-secondary);
-}
-.item-info {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-}
-.item-name {
-    font-size: 1.15rem;
-    font-weight: 600;
-    letter-spacing: 0.05em;
-}
-.tag {
-    display: inline-flex;
-    align-items: center;
-    font-size: 0.75rem;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    padding: 2px 6px;
-    border-radius: 4px;
-    margin-top: 2px;
-    width: max-content;
-}
-.tag.team-a {
-    background: var(--color-primary-alpha);
-    color: var(--color-primary);
-}
-.tag.team-b {
-    background: var(--color-secondary-alpha);
-    color: var(--color-secondary);
-}
-.item-score {
-    font-family: var(--font-heading);
-    font-size: 1.5rem;
-    color: var(--color-accent);
-    min-width: 32px;
-    text-align: center;
-}
-.empty-state {
-    padding: var(--space-6) 0;
-    text-align: center;
-    color: var(--color-text-muted);
-    font-size: 1.1rem;
-    letter-spacing: 0.05em;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--space-3);
-}
-.scoreboard {
-    display: grid;
-    grid-template-columns: 1fr auto 1fr;
-    align-items: center;
-    gap: var(--space-4);
-    margin-bottom: var(--space-6);
-}
-.team-display {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--space-3);
-}
-.shield {
-    width: 64px;
-    height: 72px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-}
-.shield-svg {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-}
-.shield-letter {
-    font-family: var(--font-heading);
-    font-size: 1.8rem;
-    z-index: 1;
-}
-.shield.team-a .shield-letter {
-    color: var(--color-primary);
-}
-.shield.team-b .shield-letter {
-    color: var(--color-secondary);
-}
-.team-name-display {
-    font-family: var(--font-heading);
-    font-size: 1.5rem;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    text-align: center;
-}
-.team-name-display.team-a {
-    color: var(--color-primary);
-}
-.team-name-display.team-b {
-    color: var(--color-secondary);
-}
-.score-number {
-    font-family: var(--font-heading);
-    font-size: clamp(4rem, 15vw, 8rem);
-    line-height: 1;
-    transition: color 0.3s ease, text-shadow 0.3s ease;
-}
-.score-number.team-a {
-    color: var(--color-primary);
-}
-.score-number.team-b {
-    color: var(--color-secondary);
-}
-.score-number.leader {
-    color: var(--color-accent);
-    text-shadow: var(--shadow-glow-accent);
-}
-.score-divider {
-    font-family: var(--font-heading);
-    font-size: clamp(2rem, 8vw, 3rem);
-    color: var(--color-text-disabled);
-    padding-bottom: var(--space-6);
-}
-.player-score-row {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-    padding: var(--space-2) 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-}
-.player-score-row:last-child {
-    border-bottom: none;
-}
-.psr-name {
-    flex: 1;
-    font-size: 1.1rem;
-    font-weight: 600;
-    letter-spacing: 0.05em;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-.psr-score {
-    font-family: var(--font-heading);
-    font-size: 1.4rem;
-    color: var(--color-accent);
-    min-width: 32px;
-    text-align: center;
-}
-.total-bar {
-    background: rgba(0, 0, 0, 0.6);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    padding: var(--space-4) var(--space-5);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: var(--space-6);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
-}
-.total-label {
-    font-size: 1.1rem;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--color-text-muted);
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-}
-.total-value {
-    font-family: var(--font-heading);
-    font-size: 2.5rem;
-    color: var(--color-primary);
-    text-shadow: var(--shadow-glow-primary);
-    line-height: 1;
-}
-.log-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: var(--space-4);
-}
-.log-entry {
-    background: rgba(0, 0, 0, 0.4);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-sm);
-    padding: var(--space-2) var(--space-4);
-    display: flex;
-    align-items: center;
-    gap: var(--space-3);
-    margin-bottom: var(--space-2);
-}
-.log-seq {
-    font-family: var(--font-heading);
-    font-size: 1.2rem;
-    color: var(--color-accent);
-    min-width: 24px;
-}
-.log-name {
-    flex: 1;
-    font-size: 1.1rem;
-    font-weight: 600;
-}
-.log-time {
-    font-size: 0.85rem;
-    color: var(--color-text-muted);
-}
+
+#canvas-confetti { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 9999; }
+.toast-container { position: fixed; bottom: var(--space-4); right: var(--space-4); display: flex; flex-direction: column; gap: var(--space-2); z-index: 9000; pointer-events: none; }
+.toast { background-color: var(--color-surface); border: 1px solid var(--color-border-light); color: var(--color-text-main); padding: var(--space-3) var(--space-4); border-radius: var(--radius-sm); font-weight: 600; letter-spacing: 0.05em; display: flex; align-items: center; gap: var(--space-3); box-shadow: var(--shadow-card); pointer-events: auto; }
+.toast.success .toast-icon { color: #00b140; }
+.toast.danger .toast-icon { color: var(--color-danger); }
+
+.modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(8px); z-index: 9500; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; }
+.modal-overlay.active { opacity: 1; pointer-events: auto; }
+.modal-content { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: var(--space-6); width: 90%; max-width: 400px; box-shadow: var(--shadow-card); transform: translateY(20px); }
+.modal-header { display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-4); }
+.modal-title { font-size: 1.25rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; }
+.modal-body { color: var(--color-text-muted); font-size: 1.1rem; line-height: 1.5; margin-bottom: var(--space-5); }
+.modal-actions { display: flex; gap: var(--space-3); justify-content: flex-end; }
+
+.container { width: 100%; max-width: 860px; padding: 0 var(--space-4); display: flex; flex-direction: column; align-items: center; }
+.header { width: 100%; text-align: center; padding: var(--space-8) 0 var(--space-6) 0; display: flex; flex-direction: column; align-items: center; }
+.header-badge { display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); background: var(--color-accent-alpha); border: 1px solid rgba(245, 200, 0, 0.2); color: var(--color-accent); padding: var(--space-1) var(--space-3); border-radius: var(--radius-sm); font-size: 0.85rem; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: var(--space-4); }
+.header-title { font-family: var(--font-heading); font-size: clamp(3rem, 10vw, 6rem); line-height: 0.9; letter-spacing: 0.02em; text-transform: uppercase; color: var(--color-text-main); margin-bottom: var(--space-2); }
+.header-title span { color: var(--color-accent); }
+.header-subtitle { color: var(--color-text-muted); font-size: 1.2rem; letter-spacing: 0.08em; }
+
+.tabs-container { display: flex; width: 100%; max-width: 500px; background: rgba(0, 0, 0, 0.6); border: 1px solid var(--color-border); border-radius: var(--radius-md); overflow: hidden; margin-bottom: var(--space-6); box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); }
+.tab-button { flex: 1; background: transparent; border: none; border-bottom: 2px solid transparent; color: var(--color-text-muted); font-family: var(--font-body); font-size: 1.1rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; padding: var(--space-3) 0; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: var(--space-2); transition: background-color 0.3s ease, color 0.3s ease; outline: none; }
+.tab-button:hover { background: var(--color-surface); color: var(--color-text-main); }
+.tab-button.active { background: rgba(255,255,255,0.1); color: #fff; border-bottom-color: #fff; }
+
+.view-container { width: 100%; display: none; flex-direction: column; gap: var(--space-4); }
+.view-container.active { display: flex; }
+
+.card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: var(--space-5); width: 100%; box-shadow: var(--shadow-card); }
+.card-header { display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-4); padding-bottom: var(--space-3); border-bottom: 1px solid var(--color-border-light); }
+.card-title { font-size: 1.1rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-text-muted); }
+
+.grid-dynamic { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--space-4); }
+.form-group { display: flex; flex-direction: column; gap: var(--space-2); }
+.form-label { font-size: 0.9rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-text-muted); }
+.form-input, .form-select { background: rgba(0, 0, 0, 0.5); border: 1px solid var(--color-border-light); border-radius: var(--radius-sm); color: var(--color-text-main); font-family: var(--font-body); font-size: 1.1rem; padding: var(--space-3); outline: none; transition: border-color 0.3s ease, box-shadow 0.3s ease; width: 100%; }
+.form-input:focus, .form-select:focus { border-color: #fff; }
+.form-select option { background: var(--color-surface); color: var(--color-text-main); }
+.form-row { display: flex; gap: var(--space-3); align-items: flex-end; flex-wrap: wrap; }
+.form-row .form-group { flex: 1; min-width: 120px; }
+
+.btn { border: none; border-radius: var(--radius-sm); font-family: var(--font-body); font-size: 1.1rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); transition: transform 0.1s ease, filter 0.3s ease; outline: none; }
+.btn:active { transform: scale(0.95); }
+.btn-primary { background: #e8ede8; color: var(--color-bg); padding: var(--space-3) var(--space-5); height: 48px; }
+.btn-primary:hover { filter: brightness(0.9); }
+.btn-danger { background: var(--color-danger); color: var(--color-text-main); padding: var(--space-3) var(--space-5); }
+.btn-outline { background: transparent; border: 1px solid var(--color-border-light); color: var(--color-text-muted); padding: var(--space-2) var(--space-4); font-size: 0.9rem; }
+.btn-outline:hover { border-color: var(--color-text-main); color: var(--color-text-main); }
+.btn-icon { background: transparent; border: 1px solid var(--color-border-light); color: var(--color-text-muted); width: 36px; height: 36px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; padding: 0; }
+.btn-icon:hover { background: var(--color-surface-hover); color: var(--color-text-main); }
+.btn-icon.danger:hover { border-color: var(--color-danger); color: var(--color-danger); background: var(--color-danger-alpha); }
+
+.btn-action { background: transparent; border: 1px solid var(--color-border-light); width: 36px; height: 36px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; color: var(--color-text-muted); }
+.btn-action:hover { background: rgba(255,255,255,0.05); color: #fff; border-color: #fff; }
+
+.list-container { display: flex; flex-direction: column; gap: var(--space-2); max-height: 400px; overflow-y: auto; padding-right: var(--space-2); }
+.list-container::-webkit-scrollbar { width: 4px; }
+.list-container::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.2); border-radius: var(--radius-sm); }
+.list-container::-webkit-scrollbar-thumb { background: var(--color-border-light); border-radius: var(--radius-sm); }
+.list-item { background: rgba(0, 0, 0, 0.4); border: 1px solid var(--color-border); border-radius: var(--radius-sm); padding: var(--space-3) var(--space-4); display: flex; align-items: center; gap: var(--space-3); }
+
+.avatar { width: 40px; height: 40px; border-radius: var(--radius-full); display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: 1px solid; }
+.item-info { flex: 1; display: flex; flex-direction: column; }
+.item-name { font-size: 1.15rem; font-weight: 600; letter-spacing: 0.05em; }
+.tag { display: inline-flex; align-items: center; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; padding: 2px 6px; border-radius: 4px; margin-top: 2px; width: max-content; }
+.item-score { font-family: var(--font-heading); font-size: 1.5rem; color: var(--color-accent); min-width: 32px; text-align: center; }
+
+.empty-state { padding: var(--space-6) 0; text-align: center; color: var(--color-text-muted); font-size: 1.1rem; letter-spacing: 0.05em; display: flex; flex-direction: column; align-items: center; gap: var(--space-3); }
+
+.scoreboard-dynamic { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: var(--space-6); margin-bottom: var(--space-6); }
+.team-display { display: flex; flex-direction: column; align-items: center; gap: var(--space-3); min-width: 120px; }
+.shield { width: 72px; height: 72px; display: flex; align-items: center; justify-content: center; border-radius: 50%; border: 2px solid; }
+.team-name-display { font-family: var(--font-heading); font-size: 1.5rem; letter-spacing: 0.05em; text-transform: uppercase; text-align: center; }
+.score-number { font-family: var(--font-heading); font-size: clamp(4rem, 12vw, 7rem); line-height: 1; transition: color 0.3s ease, text-shadow 0.3s ease; }
+.score-number.leader { color: var(--color-accent) !important; text-shadow: var(--shadow-glow-accent) !important; }
+
+.player-score-row { display: flex; align-items: center; gap: var(--space-2); padding: var(--space-2) 0; border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+.player-score-row:last-child { border-bottom: none; }
+.psr-name { flex: 1; font-size: 1.1rem; font-weight: 600; letter-spacing: 0.05em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.psr-score { font-family: var(--font-heading); font-size: 1.4rem; color: var(--color-accent); min-width: 32px; text-align: center; }
+
+.total-bar { background: rgba(0, 0, 0, 0.6); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: var(--space-4) var(--space-5); display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-6); box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3); width: 100%; }
+.total-label { font-size: 1.1rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-text-muted); display: flex; align-items: center; gap: var(--space-2); }
+.total-value { font-family: var(--font-heading); font-size: 2.5rem; color: #fff; line-height: 1; }
+
+.log-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-4); }
+.log-entry { background: rgba(0, 0, 0, 0.4); border: 1px solid var(--color-border); border-radius: var(--radius-sm); padding: var(--space-2) var(--space-4); display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-2); }
+.log-seq { font-family: var(--font-heading); font-size: 1.2rem; color: var(--color-accent); min-width: 24px; }
+.log-name { flex: 1; font-size: 1.1rem; font-weight: 600; }
+.log-time { font-size: 0.85rem; color: var(--color-text-muted); }
+
 @media (max-width: 600px) {
-    .grid-2 {
-        grid-template-columns: 1fr;
-    }
-    .form-row {
-        flex-direction: column;
-        align-items: stretch;
-    }
-    .btn-primary {
-        width: 100%;
-    }
-    .scoreboard {
-        gap: var(--space-2);
-    }
-    .total-bar {
-        flex-direction: column;
-        gap: var(--space-3);
-        text-align: center;
-    }
+    .form-row { flex-direction: column; align-items: stretch; }
+    .btn-primary { width: 100%; }
+    .total-bar { flex-direction: column; gap: var(--space-3); text-align: center; }
 }
 </style>
 </head>
@@ -734,16 +192,16 @@ body {
         <p class="header-subtitle">Cada gol vale uma dose rigorosamente cobrada.</p>
     </header>
     <nav class="tabs-container">
-        <button id="tab-cadastro" class="tab-button" data-target="view-cadastro">
+        <button class="tab-button" data-target="view-cadastro">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
                 <circle cx="9" cy="7" r="4"></circle>
                 <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
                 <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
             </svg>
-            Jogadores
+            Ajustes
         </button>
-        <button id="tab-placar" class="tab-button active" data-target="view-placar">
+        <button class="tab-button active" data-target="view-placar">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                 <rect x="3" y="3" width="18" height="18" rx="2"></rect>
                 <path d="M3 9h18"></path>
@@ -753,6 +211,7 @@ body {
         </button>
     </nav>
     <main id="view-cadastro" class="view-container">
+        <!-- CONFIGURAÇÃO DE TIMES -->
         <section class="card">
             <div class="card-header">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -760,19 +219,42 @@ body {
                     <path d="M2 17l10 5 10-5"></path>
                     <path d="M2 12l10 5 10-5"></path>
                 </svg>
-                <h2 class="card-title">Configuração dos Times</h2>
+                <h2 class="card-title">Gestão de Equipes</h2>
             </div>
-            <div class="grid-2">
-                <div class="form-group">
-                    <label class="form-label color-a">Equipe A</label>
-                    <input type="text" id="input-team-a" class="form-input large" value="Time Verde" maxlength="20">
+            
+            <div class="form-row" style="margin-bottom: var(--space-4);">
+                <div class="form-group" style="flex: 2;">
+                    <label class="form-label">Nova Equipe</label>
+                    <input type="text" id="input-new-team-name" class="form-input" placeholder="Nome do time" maxlength="20">
                 </div>
                 <div class="form-group">
-                    <label class="form-label color-b">Equipe B</label>
-                    <input type="text" id="input-team-b" class="form-input large" value="Time Azul" maxlength="20">
+                    <label class="form-label">Cor</label>
+                    <select id="select-new-team-theme" class="form-select">
+                        <option value="theme-verde">Verde</option>
+                        <option value="theme-amarelo">Amarelo</option>
+                        <option value="theme-azul">Azul</option>
+                        <option value="theme-vermelho">Vermelho</option>
+                        <option value="theme-roxo">Roxo</option>
+                        <option value="theme-laranja">Laranja</option>
+                        <option value="theme-rosa">Rosa</option>
+                    </select>
                 </div>
+                <div class="form-group">
+                    <label class="form-label">Ícone</label>
+                    <select id="select-new-team-icon" class="form-select">
+                        <option value="shield">Escudo</option>
+                        <option value="crown">Coroa</option>
+                        <option value="sword">Espada</option>
+                        <option value="star">Estrela</option>
+                        <option value="zap">Raio</option>
+                    </select>
+                </div>
+                <button id="btn-add-team" class="btn btn-primary" style="height: 48px;">Adicionar</button>
             </div>
+            <div id="teams-admin-list" class="list-container"></div>
         </section>
+
+        <!-- RECRUTAMENTO -->
         <section class="card">
             <div class="card-header">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -789,21 +271,14 @@ body {
                     <input type="text" id="input-player-name" class="form-input" placeholder="Nome do jogador" maxlength="28">
                 </div>
                 <div class="form-group" style="flex: 0.5;">
-                    <label class="form-label">Seleção</label>
-                    <select id="select-player-team" class="form-select">
-                        <option value="a">Equipe A</option>
-                        <option value="b">Equipe B</option>
-                    </select>
+                    <label class="form-label">Seleção de Equipe</label>
+                    <select id="select-player-team" class="form-select"></select>
                 </div>
-                <button id="btn-add-player" class="btn btn-primary">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="12" y1="5" x2="12" y2="19"></line>
-                        <line x1="5" y1="12" x2="19" y2="12"></line>
-                    </svg>
-                    Adicionar
-                </button>
+                <button id="btn-add-player" class="btn btn-primary">Adicionar</button>
             </div>
         </section>
+
+        <!-- ELENCO -->
         <section class="card">
             <div class="card-header">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -819,46 +294,10 @@ body {
             <div id="players-list-admin" class="list-container"></div>
         </section>
     </main>
+
     <main id="view-placar" class="view-container active">
-        <section class="scoreboard">
-            <div class="team-display">
-                <div class="shield team-a">
-                    <svg class="shield-svg" viewBox="0 0 52 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M26 2L4 12V32C4 44.5 14 55 26 58C38 55 48 44.5 48 32V12L26 2Z" fill="var(--color-primary-alpha)" stroke="var(--color-primary)" stroke-width="2"></path>
-                        <path d="M26 10L10 18V32C10 40.5 17.5 48 26 50.5C34.5 48 42 40.5 42 32V18L26 10Z" fill="rgba(0,177,64,.05)" stroke="var(--color-primary)" stroke-width="1" stroke-dasharray="4 4"></path>
-                    </svg>
-                    <span class="shield-letter">A</span>
-                </div>
-                <div id="display-team-a-name" class="team-name-display team-a">Time Verde</div>
-                <div id="display-team-a-score" class="score-number team-a">0</div>
-            </div>
-            <div class="score-divider">X</div>
-            <div class="team-display">
-                <div class="shield team-b">
-                    <svg class="shield-svg" viewBox="0 0 52 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M26 2L4 12V32C4 44.5 14 55 26 58C38 55 48 44.5 48 32V12L26 2Z" fill="var(--color-secondary-alpha)" stroke="var(--color-secondary)" stroke-width="2"></path>
-                        <path d="M26 10L10 18V32C10 40.5 17.5 48 26 50.5C34.5 48 42 40.5 42 32V18L26 10Z" fill="rgba(26,82,200,.05)" stroke="var(--color-secondary)" stroke-width="1" stroke-dasharray="4 4"></path>
-                    </svg>
-                    <span class="shield-letter">B</span>
-                </div>
-                <div id="display-team-b-name" class="team-name-display team-b">Time Azul</div>
-                <div id="display-team-b-score" class="score-number team-b">0</div>
-            </div>
-        </section>
-        <section class="grid-2">
-            <div class="card">
-                <div class="card-header" style="border-bottom-color: var(--color-primary-alpha);">
-                    <h2 id="card-team-a-name" class="card-title" style="color: var(--color-primary);">Time Verde</h2>
-                </div>
-                <div id="players-list-score-a" class="list-container"></div>
-            </div>
-            <div class="card">
-                <div class="card-header" style="border-bottom-color: var(--color-secondary-alpha);">
-                    <h2 id="card-team-b-name" class="card-title" style="color: var(--color-secondary);">Time Azul</h2>
-                </div>
-                <div id="players-list-score-b" class="list-container"></div>
-            </div>
-        </section>
+        <section class="scoreboard-dynamic" id="scoreboard-top-container"></section>
+        <section class="grid-dynamic" id="team-cards-grid"></section>
         <section class="total-bar">
             <div class="total-label">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -882,6 +321,7 @@ body {
         </section>
     </main>
 </div>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-analytics.js";
@@ -916,7 +356,7 @@ class ConfettiParticle {
         this.gravity = new Vector2D(0, 0.5);
         this.friction = 0.98;
         this.size = Math.random() * 8 + 6;
-        const colors = ['#00b140', '#1a52c8', '#f5c800', '#cc2200', '#ffffff'];
+        const colors = ['#00b140', '#1a52c8', '#f5c800', '#cc2200', '#ffffff', '#a855f7'];
         this.color = colors[Math.floor(Math.random() * colors.length)];
         this.rotation = Math.random() * 360;
         this.rotationSpeed = (Math.random() - 0.5) * 10;
@@ -974,7 +414,14 @@ class ConfettiEngine {
 
 class AppState {
     constructor() {
-        this.state = { teamA: 'Time Verde', teamB: 'Time Azul', players: [], logs: [] };
+        this.state = { 
+            teams: [
+                { id: 't_verde', name: 'Time Verde', theme: 'theme-verde', icon: 'shield' },
+                { id: 't_amarelo', name: 'Time Amarelo', theme: 'theme-amarelo', icon: 'crown' }
+            ],
+            players: [], 
+            logs: [] 
+        };
         this.listeners = [];
         this.initSync();
     }
@@ -982,7 +429,23 @@ class AppState {
     initSync() {
         onSnapshot(docRef, (docSnap) => {
             if (docSnap.exists()) {
-                this.state = docSnap.data();
+                const data = docSnap.data();
+                if (!data.teams) {
+                    data.teams = [
+                        { id: 't_verde', name: data.teamA || 'Time Verde', theme: 'theme-verde', icon: 'shield' },
+                        { id: 't_amarelo', name: data.teamB || 'Time Amarelo', theme: 'theme-amarelo', icon: 'crown' }
+                    ];
+                    data.players = (data.players || []).map(p => ({
+                        ...p,
+                        teamId: p.team === 'a' ? 't_verde' : 't_amarelo'
+                    }));
+                    delete data.teamA;
+                    delete data.teamB;
+                    this.state = data;
+                    this.pushToRemote();
+                } else {
+                    this.state = data;
+                }
                 this.notify('REMOTE_SYNC', null);
             } else {
                 this.pushToRemote();
@@ -998,29 +461,32 @@ class AppState {
     subscribe(listener) { this.listeners.push(listener); }
     notify(event, data) { this.listeners.forEach(listener => listener(event, data, this.state)); }
 
-    updateTeamName(team, name) {
-        if (team === 'a') this.state.teamA = name;
-        if (team === 'b') this.state.teamB = name;
-        this.notify('TEAM_UPDATED', { team, name });
+    addTeam(name, theme, icon) {
+        const id = 'team_' + Date.now().toString(36);
+        this.state.teams.push({ id, name, theme, icon });
+        this.notify('STRUCTURE_CHANGED', null);
         this.pushToRemote();
     }
 
-    addPlayer(name, team) {
+    removeTeam(id) {
+        this.state.teams = this.state.teams.filter(t => t.id !== id);
+        this.state.players = this.state.players.filter(p => p.teamId !== id);
+        this.notify('STRUCTURE_CHANGED', null);
+        this.pushToRemote();
+    }
+
+    addPlayer(name, teamId) {
         const id = 'player_' + Date.now().toString(36) + Math.random().toString(36).substr(2);
-        const newPlayer = { id, name, team, score: 0 };
+        const newPlayer = { id, name, teamId, score: 0 };
         this.state.players.push(newPlayer);
-        this.notify('PLAYER_ADDED', newPlayer);
+        this.notify('STRUCTURE_CHANGED', null);
         this.pushToRemote();
     }
 
     removePlayer(id) {
-        const index = this.state.players.findIndex(p => p.id === id);
-        if (index !== -1) {
-            const player = this.state.players[index];
-            this.state.players.splice(index, 1);
-            this.notify('PLAYER_REMOVED', player);
-            this.pushToRemote();
-        }
+        this.state.players = this.state.players.filter(p => p.id !== id);
+        this.notify('STRUCTURE_CHANGED', null);
+        this.pushToRemote();
     }
 
     incrementScore(id) {
@@ -1030,11 +496,11 @@ class AppState {
             const logEntry = {
                 id: 'log_' + Date.now().toString(36),
                 playerName: player.name,
-                team: player.team,
+                teamId: player.teamId,
                 time: new Date().toLocaleTimeString('pt-BR')
             };
             this.state.logs.unshift(logEntry);
-            this.notify('SCORE_INCREMENTED', { player, logEntry });
+            this.notify('SCORE_CHANGED', { player, logEntry });
             this.pushToRemote();
         }
     }
@@ -1044,12 +510,8 @@ class AppState {
         if (player && player.score > 0) {
             player.score -= 1;
             const logIndex = this.state.logs.findIndex(l => l.playerName === player.name);
-            let removedLog = null;
-            if (logIndex !== -1) {
-                removedLog = this.state.logs[logIndex];
-                this.state.logs.splice(logIndex, 1);
-            }
-            this.notify('SCORE_DECREMENTED', { player, removedLog });
+            if (logIndex !== -1) this.state.logs.splice(logIndex, 1);
+            this.notify('SCORE_CHANGED', { player });
             this.pushToRemote();
         }
     }
@@ -1057,7 +519,7 @@ class AppState {
     resetAll() {
         this.state.players.forEach(p => p.score = 0);
         this.state.logs = [];
-        this.notify('ALL_RESET', null);
+        this.notify('STRUCTURE_CHANGED', null);
         this.pushToRemote();
     }
 }
@@ -1069,22 +531,20 @@ class UIManager {
         this.elements = {
             tabs: document.querySelectorAll('.tab-button'),
             views: document.querySelectorAll('.view-container'),
-            inputTeamA: document.getElementById('input-team-a'),
-            inputTeamB: document.getElementById('input-team-b'),
-            displayTeamAName: document.getElementById('display-team-a-name'),
-            displayTeamBName: document.getElementById('display-team-b-name'),
-            cardTeamAName: document.getElementById('card-team-a-name'),
-            cardTeamBName: document.getElementById('card-team-b-name'),
-            selectTeamA: document.querySelector('#select-player-team option[value="a"]'),
-            selectTeamB: document.querySelector('#select-player-team option[value="b"]'),
+            
+            inputNewTeamName: document.getElementById('input-new-team-name'),
+            selectNewTeamTheme: document.getElementById('select-new-team-theme'),
+            selectNewTeamIcon: document.getElementById('select-new-team-icon'),
+            btnAddTeam: document.getElementById('btn-add-team'),
+            teamsAdminList: document.getElementById('teams-admin-list'),
+
             inputPlayerName: document.getElementById('input-player-name'),
             selectPlayerTeam: document.getElementById('select-player-team'),
             btnAddPlayer: document.getElementById('btn-add-player'),
-            listAdmin: document.getElementById('players-list-admin'),
-            listScoreA: document.getElementById('players-list-score-a'),
-            listScoreB: document.getElementById('players-list-score-b'),
-            displayScoreA: document.getElementById('display-team-a-score'),
-            displayScoreB: document.getElementById('display-team-b-score'),
+            playersAdminList: document.getElementById('players-list-admin'),
+            
+            scoreboardTopContainer: document.getElementById('scoreboard-top-container'),
+            teamCardsGrid: document.getElementById('team-cards-grid'),
             displayTotal: document.getElementById('display-total-score'),
             logList: document.getElementById('log-list'),
             btnResetAll: document.getElementById('btn-reset-all'),
@@ -1093,28 +553,38 @@ class UIManager {
         };
         this.bindEvents();
         this.stateManager.subscribe(this.handleStateChange.bind(this));
-        this.renderEmptyStates();
     }
 
     bindEvents() {
         this.elements.tabs.forEach(tab => tab.addEventListener('click', (e) => this.switchTab(e.currentTarget)));
-        this.elements.inputTeamA.addEventListener('input', (e) => this.stateManager.updateTeamName('a', e.target.value || 'Equipe A'));
-        this.elements.inputTeamB.addEventListener('input', (e) => this.stateManager.updateTeamName('b', e.target.value || 'Equipe B'));
         
-        const addHandler = () => {
-            const name = this.elements.inputPlayerName.value.trim();
-            const team = this.elements.selectPlayerTeam.value;
+        this.elements.btnAddTeam.addEventListener('click', () => {
+            const name = this.elements.inputNewTeamName.value.trim();
+            const theme = this.elements.selectNewTeamTheme.value;
+            const icon = this.elements.selectNewTeamIcon.value;
             if (name) {
-                this.stateManager.addPlayer(name, team);
+                this.stateManager.addTeam(name, theme, icon);
+                this.elements.inputNewTeamName.value = '';
+                this.showToast(`Equipe ${name} criada.`, 'success');
+            } else this.showToast('Informe o nome da equipe.', 'danger');
+        });
+
+        const addPlayerHandler = () => {
+            const name = this.elements.inputPlayerName.value.trim();
+            const teamId = this.elements.selectPlayerTeam.value;
+            if (name && teamId) {
+                this.stateManager.addPlayer(name, teamId);
                 this.elements.inputPlayerName.value = '';
                 this.elements.inputPlayerName.focus();
+                this.showToast(`Jogador recrutado.`, 'success');
             } else {
-                this.showToast('Informe o nome do jogador.', 'danger');
+                this.showToast('Preencha os dados do jogador.', 'danger');
             }
         };
         
-        this.elements.btnAddPlayer.addEventListener('click', addHandler);
-        this.elements.inputPlayerName.addEventListener('keypress', (e) => { if (e.key === 'Enter') addHandler(); });
+        this.elements.btnAddPlayer.addEventListener('click', addPlayerHandler);
+        this.elements.inputPlayerName.addEventListener('keypress', (e) => { if (e.key === 'Enter') addPlayerHandler(); });
+        
         this.elements.btnResetAll.addEventListener('click', () => {
             this.showModal('Atenção Crítica', 'Tem certeza que deseja zerar completamente o placar e histórico? Esta ação é irreversível.', () => {
                 this.stateManager.resetAll();
@@ -1124,63 +594,178 @@ class UIManager {
     }
 
     handleStateChange(event, data, state) {
-        if (event === 'REMOTE_SYNC') {
+        if (event === 'REMOTE_SYNC' || event === 'STRUCTURE_CHANGED') {
             this.fullRender(state);
             return;
         }
-
-        switch (event) {
-            case 'TEAM_UPDATED':
-                this.syncTeamNames(state);
-                this.updateTagsInDOM(state);
-                break;
-            case 'PLAYER_ADDED':
-                this.renderPlayerAdmin(data, state);
-                this.renderPlayerScoreRow(data);
-                this.checkEmptyStates(state);
-                this.showToast(`Jogador ${data.name} recrutado.`, 'success');
-                break;
-            case 'PLAYER_REMOVED':
-                this.removePlayerDOM(data.id);
-                this.checkEmptyStates(state);
-                this.updateScoreboards(state);
-                this.showToast(`Jogador removido.`, 'success');
-                break;
-            case 'SCORE_INCREMENTED':
-                this.updatePlayerScoreDOM(data.player);
-                this.updateScoreboards(state);
-                this.renderLogEntry(data.logEntry, state);
-                this.animateScorePulse(data.player.team);
-                this.triggerConfetti();
-                break;
-            case 'SCORE_DECREMENTED':
-                this.updatePlayerScoreDOM(data.player);
-                this.updateScoreboards(state);
-                this.removeLogEntryDOM(data.removedLog?.id);
-                break;
-            case 'ALL_RESET':
-                this.resetAllDOM(state);
-                this.checkEmptyStates(state);
-                break;
+        if (event === 'SCORE_CHANGED') {
+            this.updateScoreboardsDOM(state);
+            this.fullRenderLogs(state);
+            this.animateScorePulse(data.player.teamId);
+            if(data.logEntry) this.triggerConfetti();
         }
     }
 
     fullRender(state) {
-        this.elements.listAdmin.innerHTML = '';
-        this.elements.listScoreA.innerHTML = '';
-        this.elements.listScoreB.innerHTML = '';
-        this.elements.logList.innerHTML = '';
-        this.elements.inputTeamA.value = state.teamA;
-        this.elements.inputTeamB.value = state.teamB;
-        
-        this.syncTeamNames(state);
-        state.players.forEach(p => {
-            this.renderPlayerAdmin(p, state);
-            this.renderPlayerScoreRow(p);
+        this.fullRenderTeamsAdmin(state);
+        this.fullRenderPlayerSelect(state);
+        this.fullRenderPlayersAdmin(state);
+        this.fullRenderScoreboard(state);
+        this.updateScoreboardsDOM(state);
+        this.fullRenderLogs(state);
+    }
+
+    fullRenderTeamsAdmin(state) {
+        this.elements.teamsAdminList.innerHTML = '';
+        if (state.teams.length === 0) {
+            this.renderEmptyState(this.elements.teamsAdminList, 'Nenhuma equipe configurada.');
+            return;
+        }
+        state.teams.forEach(team => {
+            const item = this.createElement('div', ['list-item', team.theme]);
+            const avatar = this.createElement('div', ['avatar', 'dyn-border', 'dyn-bg', 'dyn-color']);
+            avatar.appendChild(this.createSVGIcon(team.icon));
+            const info = this.createElement('div', ['item-info']);
+            const nameEl = this.createElement('span', ['item-name', 'dyn-color']); nameEl.textContent = team.name;
+            info.appendChild(nameEl);
+            const btn = this.createElement('button', ['btn-icon', 'danger'], { title: 'Remover Equipe' });
+            btn.appendChild(this.createSVGIcon('trash'));
+            btn.addEventListener('click', () => {
+                this.showModal('Confirmar', `Remover a equipe ${team.name} e todos os seus jogadores?`, () => this.stateManager.removeTeam(team.id));
+            });
+            item.append(avatar, info, btn);
+            this.elements.teamsAdminList.appendChild(item);
         });
-        state.logs.forEach(l => this.renderLogEntry(l, state, false));
-        this.updateScoreboards(state);
-        this.checkEmptyStates(state);
+    }
+
+    fullRenderPlayerSelect(state) {
+        this.elements.selectPlayerTeam.innerHTML = '';
+        state.teams.forEach(team => {
+            const opt = document.createElement('option');
+            opt.value = team.id;
+            opt.textContent = team.name;
+            this.elements.selectPlayerTeam.appendChild(opt);
+        });
+    }
+
+    fullRenderPlayersAdmin(state) {
+        this.elements.playersAdminList.innerHTML = '';
+        if (state.players.length === 0) {
+            this.renderEmptyState(this.elements.playersAdminList, 'O elenco está vazio.');
+            return;
+        }
+        state.players.forEach(player => {
+            const team = state.teams.find(t => t.id === player.teamId);
+            if (!team) return;
+            const item = this.createElement('div', ['list-item', team.theme]);
+            const avatar = this.createElement('div', ['avatar', 'dyn-border', 'dyn-bg', 'dyn-color']);
+            avatar.appendChild(this.createSVGIcon('user'));
+            const info = this.createElement('div', ['item-info']);
+            const nameEl = this.createElement('span', ['item-name']); nameEl.textContent = player.name;
+            const tag = this.createElement('span', ['tag', 'dyn-bg', 'dyn-color']); tag.textContent = team.name;
+            info.append(nameEl, tag);
+            const score = this.createElement('span', ['item-score']); score.textContent = player.score;
+            const btn = this.createElement('button', ['btn-icon', 'danger'], { title: 'Remover Jogador' });
+            btn.appendChild(this.createSVGIcon('trash'));
+            btn.addEventListener('click', () => this.stateManager.removePlayer(player.id));
+            item.append(avatar, info, score, btn);
+            this.elements.playersAdminList.appendChild(item);
+        });
+    }
+
+    fullRenderScoreboard(state) {
+        this.elements.scoreboardTopContainer.innerHTML = '';
+        this.elements.teamCardsGrid.innerHTML = '';
+        
+        state.teams.forEach(team => {
+            // Placar Topo
+            const topDisp = this.createElement('div', ['team-display', team.theme]);
+            const shield = this.createElement('div', ['shield', 'dyn-border', 'dyn-bg', 'dyn-color', 'dyn-glow']);
+            shield.appendChild(this.createSVGIcon(team.icon, '32'));
+            const nameDisp = this.createElement('div', ['team-name-display', 'dyn-color']); nameDisp.textContent = team.name;
+            const scoreDisp = this.createElement('div', ['score-number', 'dyn-color'], { id: `score-top-${team.id}` }); scoreDisp.textContent = '0';
+            topDisp.append(shield, nameDisp, scoreDisp);
+            this.elements.scoreboardTopContainer.appendChild(topDisp);
+
+            // Card Grid
+            const card = this.createElement('div', ['card', team.theme]);
+            const header = this.createElement('div', ['card-header', 'dyn-border-bottom']);
+            const title = this.createElement('h2', ['card-title', 'dyn-color']); title.textContent = team.name;
+            header.appendChild(title);
+            const list = this.createElement('div', ['list-container'], { id: `list-score-${team.id}` });
+            
+            const teamPlayers = state.players.filter(p => p.teamId === team.id);
+            if(teamPlayers.length === 0) {
+                this.renderEmptyState(list, 'Sem escalação');
+            } else {
+                teamPlayers.forEach(player => {
+                    const row = this.createElement('div', ['player-score-row']);
+                    const pName = this.createElement('span', ['psr-name']); pName.textContent = player.name;
+                    const pScore = this.createElement('span', ['psr-score'], { id: `score-val-${player.id}` }); pScore.textContent = player.score;
+                    
+                    const btnMinus = this.createElement('button', ['btn-action'], { title: 'Remover dose' });
+                    btnMinus.appendChild(this.createSVGIcon('minus'));
+                    btnMinus.addEventListener('click', () => this.stateManager.decrementScore(player.id));
+                    
+                    const btnPlus = this.createElement('button', ['btn-action', 'dyn-color', 'dyn-border-solid'], { title: 'Marcar dose' });
+                    btnPlus.appendChild(this.createSVGIcon('plus'));
+                    btnPlus.addEventListener('click', () => this.stateManager.incrementScore(player.id));
+                    
+                    row.append(pName, pScore, btnMinus, btnPlus);
+                    list.appendChild(row);
+                });
+            }
+            card.append(header, list);
+            this.elements.teamCardsGrid.appendChild(card);
+        });
+    }
+
+    updateScoreboardsDOM(state) {
+        let total = 0;
+        let maxScore = -1;
+        const scores = {};
+
+        state.teams.forEach(t => scores[t.id] = 0);
+        state.players.forEach(p => {
+            if(scores[p.teamId] !== undefined) scores[p.teamId] += p.score;
+            total += p.score;
+            const viewScore = document.getElementById(`score-val-${p.id}`);
+            if(viewScore) viewScore.textContent = p.score;
+        });
+
+        Object.keys(scores).forEach(teamId => {
+            if(scores[teamId] > maxScore) maxScore = scores[teamId];
+        });
+
+        state.teams.forEach(team => {
+            const el = document.getElementById(`score-top-${team.id}`);
+            if (el) {
+                el.textContent = scores[team.id];
+                el.classList.remove('leader');
+                if(scores[team.id] === maxScore && maxScore > 0) el.classList.add('leader');
+            }
+        });
+        this.elements.displayTotal.textContent = total;
+    }
+
+    fullRenderLogs(state) {
+        this.elements.logList.innerHTML = '';
+        if (state.logs.length === 0) {
+            this.renderEmptyState(this.elements.logList, 'Nenhum registro.');
+            return;
+        }
+        const sortedLogs = [...state.logs].sort((a,b) => b.id.localeCompare(a.id));
+        sortedLogs.forEach((log, index) => {
+            const team = state.teams.find(t => t.id === log.teamId);
+            if(!team) return;
+            const entry = this.createElement('div', ['log-entry', team.theme]);
+            const seq = this.createElement('span', ['log-seq']); seq.textContent = sortedLogs.length - index;
+            const name = this.createElement('span', ['log-name']); name.textContent = log.playerName;
+            const tag = this.createElement('span', ['tag', 'dyn-bg', 'dyn-color']); tag.textContent = team.name;
+            const time = this.createElement('span', ['log-time']); time.textContent = log.time;
+            entry.append(seq, name, tag, time);
+            this.elements.logList.appendChild(entry);
+        });
     }
 
     switchTab(targetTab) {
@@ -1200,20 +785,13 @@ class UIManager {
         });
     }
 
-    syncTeamNames(state) {
-        this.elements.displayTeamAName.textContent = state.teamA;
-        this.elements.displayTeamBName.textContent = state.teamB;
-        this.elements.cardTeamAName.textContent = state.teamA;
-        this.elements.cardTeamBName.textContent = state.teamB;
-        this.elements.selectTeamA.textContent = state.teamA;
-        this.elements.selectTeamB.textContent = state.teamB;
+    animateScorePulse(teamId) {
+        const el = document.getElementById(`score-top-${teamId}`);
+        if(el) gsap.timeline().to(el, { scale: 1.2, duration: 0.1, ease: 'power2.out' }).to(el, { scale: 1, duration: 0.3, ease: 'bounce.out' });
     }
 
-    updateTagsInDOM(state) {
-        document.querySelectorAll('.tag.team-a').forEach(el => el.textContent = state.teamA);
-        document.querySelectorAll('.tag.team-b').forEach(el => el.textContent = state.teamB);
-        document.querySelectorAll('.log-time.team-a').forEach(el => el.textContent = state.teamA);
-        document.querySelectorAll('.log-time.team-b').forEach(el => el.textContent = state.teamB);
+    triggerConfetti() {
+        this.confetti.burst(window.innerWidth / 2, window.innerHeight * 0.2);
     }
 
     createElement(tag, classNames = [], attributes = {}) {
@@ -1223,23 +801,23 @@ class UIManager {
         return el;
     }
 
-    createSVGIcon(type) {
+    createSVGIcon(type, size = '16') {
         const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-        svg.setAttribute('width', '16'); svg.setAttribute('height', '16');
+        svg.setAttribute('width', size); svg.setAttribute('height', size);
         svg.setAttribute('viewBox', '0 0 24 24'); svg.setAttribute('fill', 'none');
-        svg.setAttribute('stroke', 'currentColor'); svg.setAttribute('stroke-width', '2.5');
+        svg.setAttribute('stroke', 'currentColor'); svg.setAttribute('stroke-width', '2.2');
         svg.setAttribute('stroke-linecap', 'round'); svg.setAttribute('stroke-linejoin', 'round');
+        
         if (type === 'user') {
-            const p1 = document.createElementNS('http://www.w3.org/2000/svg', 'path'); p1.setAttribute('d', 'M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2');
+            const p = document.createElementNS('http://www.w3.org/2000/svg', 'path'); p.setAttribute('d', 'M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2');
             const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle'); c.setAttribute('cx', '12'); c.setAttribute('cy', '7'); c.setAttribute('r', '4');
-            svg.appendChild(p1); svg.appendChild(c);
+            svg.append(p, c);
         } else if (type === 'trash') {
             const p1 = document.createElementNS('http://www.w3.org/2000/svg', 'polyline'); p1.setAttribute('points', '3 6 5 6 21 6');
             const p2 = document.createElementNS('http://www.w3.org/2000/svg', 'path'); p2.setAttribute('d', 'M19 6l-1 14H6L5 6');
             const p3 = document.createElementNS('http://www.w3.org/2000/svg', 'path'); p3.setAttribute('d', 'M10 11v6');
             const p4 = document.createElementNS('http://www.w3.org/2000/svg', 'path'); p4.setAttribute('d', 'M14 11v6');
-            const p5 = document.createElementNS('http://www.w3.org/2000/svg', 'path'); p5.setAttribute('d', 'M9 6V4h6v2');
-            svg.append(p1, p2, p3, p4, p5);
+            svg.append(p1, p2, p3, p4);
         } else if (type === 'plus') {
             const p1 = document.createElementNS('http://www.w3.org/2000/svg', 'line'); p1.setAttribute('x1', '12'); p1.setAttribute('y1', '5'); p1.setAttribute('x2', '12'); p1.setAttribute('y2', '19');
             const p2 = document.createElementNS('http://www.w3.org/2000/svg', 'line'); p2.setAttribute('x1', '5'); p2.setAttribute('y1', '12'); p2.setAttribute('x2', '19'); p2.setAttribute('y2', '12');
@@ -1247,136 +825,24 @@ class UIManager {
         } else if (type === 'minus') {
             const p1 = document.createElementNS('http://www.w3.org/2000/svg', 'line'); p1.setAttribute('x1', '5'); p1.setAttribute('y1', '12'); p1.setAttribute('x2', '19'); p1.setAttribute('y2', '12');
             svg.appendChild(p1);
+        } else if (type === 'shield') {
+            const p = document.createElementNS('http://www.w3.org/2000/svg', 'path'); p.setAttribute('d', 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z');
+            svg.appendChild(p);
+        } else if (type === 'crown') {
+            const p1 = document.createElementNS('http://www.w3.org/2000/svg', 'path'); p1.setAttribute('d', 'M2 22h20');
+            const p2 = document.createElementNS('http://www.w3.org/2000/svg', 'path'); p2.setAttribute('d', 'M2 18l5-10 5 6 5-6 5 10H2z');
+            svg.append(p1, p2);
+        } else if (type === 'sword') {
+            const p = document.createElementNS('http://www.w3.org/2000/svg', 'path'); p.setAttribute('d', 'M14.5 17.5L3 6V3h3l11.5 11.5M13 19l6-6M16 16l4 4M19 21l2-2');
+            svg.appendChild(p);
+        } else if (type === 'star') {
+            const p = document.createElementNS('http://www.w3.org/2000/svg', 'polygon'); p.setAttribute('points', '12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2');
+            svg.appendChild(p);
+        } else if (type === 'zap') {
+            const p = document.createElementNS('http://www.w3.org/2000/svg', 'polygon'); p.setAttribute('points', '13 2 3 14 12 14 11 22 21 10 12 10 13 2');
+            svg.appendChild(p);
         }
         return svg;
-    }
-
-    renderPlayerAdmin(player, state) {
-        if (document.getElementById(`admin-${player.id}`)) return;
-        const teamName = player.team === 'a' ? state.teamA : state.teamB;
-        const item = this.createElement('div', ['list-item'], { id: `admin-${player.id}` });
-        const avatar = this.createElement('div', ['avatar', `team-${player.team}`]);
-        avatar.appendChild(this.createSVGIcon('user'));
-        const info = this.createElement('div', ['item-info']);
-        const nameEl = this.createElement('span', ['item-name']); nameEl.textContent = player.name;
-        const tag = this.createElement('span', ['tag', `team-${player.team}`]); tag.textContent = teamName;
-        info.append(nameEl, tag);
-        const score = this.createElement('span', ['item-score'], { id: `admin-score-${player.id}` }); score.textContent = player.score;
-        const btn = this.createElement('button', ['btn-icon', 'danger'], { title: 'Remover' });
-        btn.appendChild(this.createSVGIcon('trash'));
-        btn.addEventListener('click', () => {
-            this.showModal('Confirmar Ação', `Remover o jogador ${player.name} permanentemente?`, () => this.stateManager.removePlayer(player.id));
-        });
-        item.append(avatar, info, score, btn);
-        this.elements.listAdmin.appendChild(item);
-        gsap.from(item, { opacity: 0, x: -20, duration: 0.3, ease: 'power2.out' });
-    }
-
-    renderPlayerScoreRow(player) {
-        if (document.getElementById(`score-row-${player.id}`)) return;
-        const row = this.createElement('div', ['player-score-row'], { id: `score-row-${player.id}` });
-        const nameEl = this.createElement('span', ['psr-name']); nameEl.textContent = player.name;
-        const scoreEl = this.createElement('span', ['psr-score'], { id: `score-val-${player.id}` }); scoreEl.textContent = player.score;
-        const btnMinus = this.createElement('button', ['btn-action', 'minus'], { title: 'Remover dose' }); btnMinus.appendChild(this.createSVGIcon('minus'));
-        btnMinus.addEventListener('click', () => this.stateManager.decrementScore(player.id));
-        const btnClasses = player.team === 'b' ? ['btn-action', 'blue'] : ['btn-action'];
-        const btnPlus = this.createElement('button', btnClasses, { title: 'Marcar dose' }); btnPlus.appendChild(this.createSVGIcon('plus'));
-        btnPlus.addEventListener('click', () => this.stateManager.incrementScore(player.id));
-        row.append(nameEl, scoreEl, btnMinus, btnPlus);
-        if (player.team === 'a') this.elements.listScoreA.appendChild(row);
-        else this.elements.listScoreB.appendChild(row);
-        gsap.from(row, { opacity: 0, y: 10, duration: 0.3, ease: 'power1.out' });
-    }
-
-    removePlayerDOM(id) {
-        const adminEl = document.getElementById(`admin-${id}`);
-        const scoreEl = document.getElementById(`score-row-${id}`);
-        if (adminEl) gsap.to(adminEl, { opacity: 0, x: 20, duration: 0.2, onComplete: () => adminEl.remove() });
-        if (scoreEl) gsap.to(scoreEl, { opacity: 0, scale: 0.9, duration: 0.2, onComplete: () => scoreEl.remove() });
-    }
-
-    updatePlayerScoreDOM(player) {
-        const adminScore = document.getElementById(`admin-score-${player.id}`);
-        const viewScore = document.getElementById(`score-val-${player.id}`);
-        if (adminScore) adminScore.textContent = player.score;
-        if (viewScore) {
-            viewScore.textContent = player.score;
-            gsap.fromTo(viewScore, { scale: 1.5, color: '#fff' }, { scale: 1, color: 'var(--color-accent)', duration: 0.4 });
-        }
-    }
-
-    updateScoreboards(state) {
-        let scoreA = 0, scoreB = 0;
-        state.players.forEach(p => { if (p.team === 'a') scoreA += p.score; if (p.team === 'b') scoreB += p.score; });
-        if (parseInt(this.elements.displayScoreA.textContent) !== scoreA) this.elements.displayScoreA.textContent = scoreA;
-        if (parseInt(this.elements.displayScoreB.textContent) !== scoreB) this.elements.displayScoreB.textContent = scoreB;
-        this.elements.displayScoreA.classList.remove('leader');
-        this.elements.displayScoreB.classList.remove('leader');
-        if (scoreA > scoreB) this.elements.displayScoreA.classList.add('leader');
-        if (scoreB > scoreA) this.elements.displayScoreB.classList.add('leader');
-        this.elements.displayTotal.textContent = scoreA + scoreB;
-    }
-
-    animateScorePulse(team) {
-        const el = team === 'a' ? this.elements.displayScoreA : this.elements.displayScoreB;
-        gsap.timeline().to(el, { scale: 1.2, duration: 0.1, ease: 'power2.out' }).to(el, { scale: 1, duration: 0.3, ease: 'bounce.out' });
-    }
-
-    triggerConfetti() {
-        const rect = document.querySelector('.score-divider').getBoundingClientRect();
-        this.confetti.burst(rect.left + rect.width / 2, rect.top);
-    }
-
-    renderLogEntry(logEntry, state, animate = true) {
-        if (document.getElementById(logEntry.id)) return;
-        const teamName = logEntry.team === 'a' ? state.teamA : state.teamB;
-        const entry = this.createElement('div', ['log-entry'], { id: logEntry.id });
-        const seq = this.createElement('span', ['log-seq']);
-        const name = this.createElement('span', ['log-name']); name.textContent = logEntry.playerName;
-        const tag = this.createElement('span', ['tag', `team-${logEntry.team}`, 'log-time']); tag.textContent = teamName;
-        const time = this.createElement('span', ['log-time']); time.textContent = logEntry.time;
-        entry.append(seq, name, tag, time);
-        
-        const emptyState = this.elements.logList.querySelector('.empty-state');
-        if (emptyState) emptyState.remove();
-        
-        this.elements.logList.appendChild(entry);
-        if (animate) gsap.from(entry, { opacity: 0, height: 0, padding: 0, duration: 0.3, ease: 'power2.out' });
-        this.renumberLogs();
-    }
-
-    removeLogEntryDOM(id) {
-        if (!id) return;
-        const entry = document.getElementById(id);
-        if (entry) {
-            gsap.to(entry, { opacity: 0, height: 0, padding: 0, duration: 0.2, onComplete: () => {
-                entry.remove();
-                this.renumberLogs();
-                if (this.elements.logList.children.length === 0) this.renderEmptyState(this.elements.logList, 'Nenhum registro de ocorrência.');
-            }});
-        }
-    }
-
-    renumberLogs() {
-        const entries = Array.from(this.elements.logList.querySelectorAll('.log-entry'));
-        entries.sort((a, b) => b.id.localeCompare(a.id)); 
-        this.elements.logList.innerHTML = '';
-        entries.forEach((entry, index) => {
-            const seqEl = entry.querySelector('.log-seq');
-            if (seqEl) seqEl.textContent = entries.length - index;
-            this.elements.logList.appendChild(entry);
-        });
-    }
-
-    resetAllDOM(state) {
-        state.players.forEach(p => {
-            const scoreAdmin = document.getElementById(`admin-score-${p.id}`);
-            const scoreView = document.getElementById(`score-val-${p.id}`);
-            if (scoreAdmin) scoreAdmin.textContent = '0';
-            if (scoreView) scoreView.textContent = '0';
-        });
-        this.elements.logList.innerHTML = '';
-        this.updateScoreboards(state);
     }
 
     renderEmptyState(container, message) {
@@ -1385,43 +851,10 @@ class UIManager {
         container.appendChild(empty);
     }
 
-    checkEmptyStates(state) {
-        if (state.players.length === 0) this.renderEmptyState(this.elements.listAdmin, 'O elenco está vazio. Adicione membros acima.');
-        else { const e = this.elements.listAdmin.querySelector('.empty-state'); if (e) e.remove(); }
-        
-        if (state.players.filter(p => p.team === 'a').length === 0) this.renderEmptyState(this.elements.listScoreA, 'Sem escalação.');
-        else { const e = this.elements.listScoreA.querySelector('.empty-state'); if (e) e.remove(); }
-        
-        if (state.players.filter(p => p.team === 'b').length === 0) this.renderEmptyState(this.elements.listScoreB, 'Sem escalação.');
-        else { const e = this.elements.listScoreB.querySelector('.empty-state'); if (e) e.remove(); }
-        
-        if (state.logs.length === 0) this.renderEmptyState(this.elements.logList, 'Nenhum registro de ocorrência.');
-        else { const e = this.elements.logList.querySelector('.empty-state'); if (e) e.remove(); }
-    }
-
-    renderEmptyStates() {
-        this.renderEmptyState(this.elements.listAdmin, 'O elenco está vazio.');
-        this.renderEmptyState(this.elements.listScoreA, 'Sem escalação.');
-        this.renderEmptyState(this.elements.listScoreB, 'Sem escalação.');
-        this.renderEmptyState(this.elements.logList, 'Nenhum registro.');
-    }
-
     showToast(message, type = 'success') {
         const toast = this.createElement('div', ['toast', type]);
         const iconDiv = this.createElement('div', ['toast-icon']);
-        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-        svg.setAttribute('width', '20'); svg.setAttribute('height', '20'); svg.setAttribute('viewBox', '0 0 24 24');
-        svg.setAttribute('fill', 'none'); svg.setAttribute('stroke', 'currentColor'); svg.setAttribute('stroke-width', '2.5');
-        svg.setAttribute('stroke-linecap', 'round'); svg.setAttribute('stroke-linejoin', 'round');
-        if (type === 'success') {
-            const p = document.createElementNS('http://www.w3.org/2000/svg', 'polyline'); p.setAttribute('points', '20 6 9 17 4 12');
-            svg.appendChild(p);
-        } else {
-            const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle'); c.setAttribute('cx', '12'); c.setAttribute('cy', '12'); c.setAttribute('r', '10');
-            const l1 = document.createElementNS('http://www.w3.org/2000/svg', 'line'); l1.setAttribute('x1', '15'); l1.setAttribute('y1', '9'); l1.setAttribute('x2', '9'); l1.setAttribute('y2', '15');
-            const l2 = document.createElementNS('http://www.w3.org/2000/svg', 'line'); l2.setAttribute('x1', '9'); l2.setAttribute('y1', '9'); l2.setAttribute('x2', '15'); l2.setAttribute('y2', '15');
-            svg.append(c, l1, l2);
-        }
+        const svg = this.createSVGIcon(type === 'success' ? 'plus' : 'minus', '20');
         iconDiv.appendChild(svg);
         const textDiv = this.createElement('div'); textDiv.textContent = message;
         toast.append(iconDiv, textDiv);
@@ -1434,14 +867,8 @@ class UIManager {
         this.elements.modalRoot.innerHTML = '';
         const content = this.createElement('div', ['modal-content']);
         const header = this.createElement('div', ['modal-header']);
-        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-        svg.setAttribute('width', '24'); svg.setAttribute('height', '24'); svg.setAttribute('viewBox', '0 0 24 24');
-        svg.setAttribute('fill', 'none'); svg.setAttribute('stroke', 'var(--color-danger)'); svg.setAttribute('stroke-width', '2.5');
-        svg.setAttribute('stroke-linecap', 'round'); svg.setAttribute('stroke-linejoin', 'round');
-        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path'); path.setAttribute('d', 'M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z');
-        const l1 = document.createElementNS('http://www.w3.org/2000/svg', 'line'); l1.setAttribute('x1', '12'); l1.setAttribute('y1', '9'); l1.setAttribute('x2', '12'); l1.setAttribute('y2', '13');
-        const l2 = document.createElementNS('http://www.w3.org/2000/svg', 'line'); l2.setAttribute('x1', '12'); l2.setAttribute('y1', '17'); l2.setAttribute('x2', '12.01'); l2.setAttribute('y2', '17');
-        svg.append(path, l1, l2);
+        const svg = this.createSVGIcon('minus', '24');
+        svg.style.stroke = 'var(--color-danger)';
         const titleEl = this.createElement('h3', ['modal-title']); titleEl.textContent = title;
         header.append(svg, titleEl);
         const bodyEl = this.createElement('p', ['modal-body']); bodyEl.textContent = message;
@@ -1468,7 +895,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const appState = new AppState();
     const confettiEngine = new ConfettiEngine('canvas-confetti');
     const uiManager = new UIManager(appState, confettiEngine);
-    console.log('Firebase e Analytics conectados. Sistemas operantes.');
+    console.log('Firebase e Motor de Escalabilidade Conectados.');
 });
 </script>
 </body>
