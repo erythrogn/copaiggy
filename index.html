@@ -17,13 +17,11 @@
     --color-text-muted: #9ba8a2;
     --color-text-disabled: #5a6b63;
     
-    /* Cores do Sistema Base */
     --color-danger: #cc2200;
     --color-danger-alpha: rgba(204, 34, 0, 0.15);
     --color-accent: #f5c800;
     --color-accent-alpha: rgba(245, 200, 0, 0.12);
 
-    /* Medidas e Tipografia */
     --radius-sm: 6px;
     --radius-md: 10px;
     --radius-lg: 16px;
@@ -41,7 +39,6 @@
     --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.4);
 }
 
-/* ─── TEMAS DINÂMICOS ─── */
 .theme-verde    { --c-main: #00b140; --c-alpha: rgba(0, 177, 64, 0.15); }
 .theme-amarelo  { --c-main: #f5c800; --c-alpha: rgba(245, 200, 0, 0.15); }
 .theme-azul     { --c-main: #1a52c8; --c-alpha: rgba(26, 82, 200, 0.15); }
@@ -75,7 +72,6 @@ body {
     padding-bottom: var(--space-10);
 }
 
-/* ─── ANIMAÇÃO DE ENTRADA ─── */
 .intro-overlay {
     position: fixed;
     top: 0;
@@ -202,7 +198,6 @@ body {
 </head>
 <body>
 
-<!-- OVERLAY DE INTRODUÇÃO -->
 <div id="intro-overlay" class="intro-overlay">
     <h1 class="intro-text">Copa da<br>Iggy Azaketty</h1>
 </div>
@@ -243,7 +238,6 @@ body {
         </button>
     </nav>
     <main id="view-cadastro" class="view-container">
-        <!-- CONFIGURAÇÃO DE TIMES -->
         <section class="card">
             <div class="card-header">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -279,6 +273,19 @@ body {
                         <option value="sword">Espada</option>
                         <option value="star">Estrela</option>
                         <option value="zap">Raio</option>
+                        <option value="flame">Fogo</option>
+                        <option value="heart">Coração</option>
+                        <option value="skull">Caveira</option>
+                        <option value="ghost">Fantasma</option>
+                        <option value="moon">Lua</option>
+                        <option value="sun">Sol</option>
+                        <option value="anchor">Âncora</option>
+                        <option value="target">Alvo</option>
+                        <option value="award">Prêmio</option>
+                        <option value="flag">Bandeira</option>
+                        <option value="crosshair">Mira</option>
+                        <option value="coffee">Café</option>
+                        <option value="music">Música</option>
                     </select>
                 </div>
                 <button id="btn-add-team" class="btn btn-primary" style="height: 48px;">Adicionar</button>
@@ -286,7 +293,6 @@ body {
             <div id="teams-admin-list" class="list-container"></div>
         </section>
 
-        <!-- RECRUTAMENTO -->
         <section class="card">
             <div class="card-header">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -310,7 +316,6 @@ body {
             </div>
         </section>
 
-        <!-- ELENCO -->
         <section class="card">
             <div class="card-header">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -710,7 +715,6 @@ class UIManager {
         this.elements.teamCardsGrid.innerHTML = '';
         
         state.teams.forEach(team => {
-            // Placar Topo
             const topDisp = this.createElement('div', ['team-display', team.theme]);
             const shield = this.createElement('div', ['shield', 'dyn-border', 'dyn-bg', 'dyn-color', 'dyn-glow']);
             shield.appendChild(this.createSVGIcon(team.icon, '32'));
@@ -719,7 +723,6 @@ class UIManager {
             topDisp.append(shield, nameDisp, scoreDisp);
             this.elements.scoreboardTopContainer.appendChild(topDisp);
 
-            // Card Grid
             const card = this.createElement('div', ['card', team.theme]);
             const header = this.createElement('div', ['card-header', 'dyn-border-bottom']);
             const title = this.createElement('h2', ['card-title', 'dyn-color']); title.textContent = team.name;
@@ -873,6 +876,75 @@ class UIManager {
         } else if (type === 'zap') {
             const p = document.createElementNS('http://www.w3.org/2000/svg', 'polygon'); p.setAttribute('points', '13 2 3 14 12 14 11 22 21 10 12 10 13 2');
             svg.appendChild(p);
+        } else if (type === 'flame') {
+            const p = document.createElementNS('http://www.w3.org/2000/svg', 'path'); p.setAttribute('d', 'M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z');
+            svg.appendChild(p);
+        } else if (type === 'heart') {
+            const p = document.createElementNS('http://www.w3.org/2000/svg', 'path'); p.setAttribute('d', 'M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z');
+            svg.appendChild(p);
+        } else if (type === 'skull') {
+            const c1 = document.createElementNS('http://www.w3.org/2000/svg', 'circle'); c1.setAttribute('cx', '9'); c1.setAttribute('cy', '12'); c1.setAttribute('r', '1');
+            const c2 = document.createElementNS('http://www.w3.org/2000/svg', 'circle'); c2.setAttribute('cx', '15'); c2.setAttribute('cy', '12'); c2.setAttribute('r', '1');
+            const p1 = document.createElementNS('http://www.w3.org/2000/svg', 'path'); p1.setAttribute('d', 'M8 20v2h8v-2');
+            const p2 = document.createElementNS('http://www.w3.org/2000/svg', 'path'); p2.setAttribute('d', 'M12.5 17l-.5-1-.5 1h1z');
+            const p3 = document.createElementNS('http://www.w3.org/2000/svg', 'path'); p3.setAttribute('d', 'M16 20a2 2 0 0 0 1.56-3.25 8 8 0 1 0-11.12 0A2 2 0 0 0 8 20');
+            svg.append(c1, c2, p1, p2, p3);
+        } else if (type === 'ghost') {
+            const p1 = document.createElementNS('http://www.w3.org/2000/svg', 'path'); p1.setAttribute('d', 'M9 10h.01');
+            const p2 = document.createElementNS('http://www.w3.org/2000/svg', 'path'); p2.setAttribute('d', 'M15 10h.01');
+            const p3 = document.createElementNS('http://www.w3.org/2000/svg', 'path'); p3.setAttribute('d', 'M12 2a8 8 0 0 0-8 8v12l3-3 2.5 2.5L12 19l2.5 2.5L17 19l3 3V10a8 8 0 0 0-8-8z');
+            svg.append(p1, p2, p3);
+        } else if (type === 'moon') {
+            const p = document.createElementNS('http://www.w3.org/2000/svg', 'path'); p.setAttribute('d', 'M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z');
+            svg.appendChild(p);
+        } else if (type === 'sun') {
+            const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle'); c.setAttribute('cx', '12'); c.setAttribute('cy', '12'); c.setAttribute('r', '5');
+            const l1 = document.createElementNS('http://www.w3.org/2000/svg', 'line'); l1.setAttribute('x1', '12'); l1.setAttribute('y1', '1'); l1.setAttribute('x2', '12'); l1.setAttribute('y2', '3');
+            const l2 = document.createElementNS('http://www.w3.org/2000/svg', 'line'); l2.setAttribute('x1', '12'); l2.setAttribute('y1', '21'); l2.setAttribute('x2', '12'); l2.setAttribute('y2', '23');
+            const l3 = document.createElementNS('http://www.w3.org/2000/svg', 'line'); l3.setAttribute('x1', '4.22'); l3.setAttribute('y1', '4.22'); l3.setAttribute('x2', '5.64'); l3.setAttribute('y2', '5.64');
+            const l4 = document.createElementNS('http://www.w3.org/2000/svg', 'line'); l4.setAttribute('x1', '18.36'); l4.setAttribute('y1', '18.36'); l4.setAttribute('x2', '19.78'); l4.setAttribute('y2', '19.78');
+            const l5 = document.createElementNS('http://www.w3.org/2000/svg', 'line'); l5.setAttribute('x1', '1'); l5.setAttribute('y1', '12'); l5.setAttribute('x2', '3'); l5.setAttribute('y2', '12');
+            const l6 = document.createElementNS('http://www.w3.org/2000/svg', 'line'); l6.setAttribute('x1', '21'); l6.setAttribute('y1', '12'); l6.setAttribute('x2', '23'); l6.setAttribute('y2', '12');
+            const l7 = document.createElementNS('http://www.w3.org/2000/svg', 'line'); l7.setAttribute('x1', '4.22'); l7.setAttribute('y1', '19.78'); l7.setAttribute('x2', '5.64'); l7.setAttribute('y2', '18.36');
+            const l8 = document.createElementNS('http://www.w3.org/2000/svg', 'line'); l8.setAttribute('x1', '18.36'); l8.setAttribute('y1', '5.64'); l8.setAttribute('x2', '19.78'); l8.setAttribute('y2', '4.22');
+            svg.append(c, l1, l2, l3, l4, l5, l6, l7, l8);
+        } else if (type === 'anchor') {
+            const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle'); c.setAttribute('cx', '12'); c.setAttribute('cy', '5'); c.setAttribute('r', '3');
+            const l = document.createElementNS('http://www.w3.org/2000/svg', 'line'); l.setAttribute('x1', '12'); l.setAttribute('y1', '22'); l.setAttribute('x2', '12'); l.setAttribute('y2', '8');
+            const p = document.createElementNS('http://www.w3.org/2000/svg', 'path'); p.setAttribute('d', 'M5 12H2a10 10 0 0 0 20 0h-3');
+            svg.append(c, l, p);
+        } else if (type === 'target') {
+            const c1 = document.createElementNS('http://www.w3.org/2000/svg', 'circle'); c1.setAttribute('cx', '12'); c1.setAttribute('cy', '12'); c1.setAttribute('r', '10');
+            const c2 = document.createElementNS('http://www.w3.org/2000/svg', 'circle'); c2.setAttribute('cx', '12'); c2.setAttribute('cy', '12'); c2.setAttribute('r', '6');
+            const c3 = document.createElementNS('http://www.w3.org/2000/svg', 'circle'); c3.setAttribute('cx', '12'); c3.setAttribute('cy', '12'); c3.setAttribute('r', '2');
+            svg.append(c1, c2, c3);
+        } else if (type === 'award') {
+            const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle'); c.setAttribute('cx', '12'); c.setAttribute('cy', '8'); c.setAttribute('r', '7');
+            const pl = document.createElementNS('http://www.w3.org/2000/svg', 'polyline'); pl.setAttribute('points', '8.21 13.89 7 23 12 20 17 23 15.79 13.88');
+            svg.append(c, pl);
+        } else if (type === 'flag') {
+            const p = document.createElementNS('http://www.w3.org/2000/svg', 'path'); p.setAttribute('d', 'M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z');
+            const l = document.createElementNS('http://www.w3.org/2000/svg', 'line'); l.setAttribute('x1', '4'); l.setAttribute('y1', '22'); l.setAttribute('x2', '4'); l.setAttribute('y2', '15');
+            svg.append(p, l);
+        } else if (type === 'crosshair') {
+            const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle'); c.setAttribute('cx', '12'); c.setAttribute('cy', '12'); c.setAttribute('r', '10');
+            const l1 = document.createElementNS('http://www.w3.org/2000/svg', 'line'); l1.setAttribute('x1', '22'); l1.setAttribute('y1', '12'); l1.setAttribute('x2', '18'); l1.setAttribute('y2', '12');
+            const l2 = document.createElementNS('http://www.w3.org/2000/svg', 'line'); l2.setAttribute('x1', '6'); l2.setAttribute('y1', '12'); l2.setAttribute('x2', '2'); l2.setAttribute('y2', '12');
+            const l3 = document.createElementNS('http://www.w3.org/2000/svg', 'line'); l3.setAttribute('x1', '12'); l3.setAttribute('y1', '6'); l3.setAttribute('x2', '12'); l3.setAttribute('y2', '2');
+            const l4 = document.createElementNS('http://www.w3.org/2000/svg', 'line'); l4.setAttribute('x1', '12'); l4.setAttribute('y1', '22'); l4.setAttribute('x2', '12'); l4.setAttribute('y2', '18');
+            svg.append(c, l1, l2, l3, l4);
+        } else if (type === 'coffee') {
+            const p1 = document.createElementNS('http://www.w3.org/2000/svg', 'path'); p1.setAttribute('d', 'M18 8h1a4 4 0 0 1 0 8h-1');
+            const p2 = document.createElementNS('http://www.w3.org/2000/svg', 'path'); p2.setAttribute('d', 'M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z');
+            const l1 = document.createElementNS('http://www.w3.org/2000/svg', 'line'); l1.setAttribute('x1', '6'); l1.setAttribute('y1', '1'); l1.setAttribute('x2', '6'); l1.setAttribute('y2', '4');
+            const l2 = document.createElementNS('http://www.w3.org/2000/svg', 'line'); l2.setAttribute('x1', '10'); l2.setAttribute('y1', '1'); l2.setAttribute('x2', '10'); l2.setAttribute('y2', '4');
+            const l3 = document.createElementNS('http://www.w3.org/2000/svg', 'line'); l3.setAttribute('x1', '14'); l3.setAttribute('y1', '1'); l3.setAttribute('x2', '14'); l3.setAttribute('y2', '4');
+            svg.append(p1, p2, l1, l2, l3);
+        } else if (type === 'music') {
+            const p = document.createElementNS('http://www.w3.org/2000/svg', 'path'); p.setAttribute('d', 'M9 18V5l12-2v13');
+            const c1 = document.createElementNS('http://www.w3.org/2000/svg', 'circle'); c1.setAttribute('cx', '6'); c1.setAttribute('cy', '18'); c1.setAttribute('r', '3');
+            const c2 = document.createElementNS('http://www.w3.org/2000/svg', 'circle'); c2.setAttribute('cx', '18'); c2.setAttribute('cy', '16'); c2.setAttribute('r', '3');
+            svg.append(p, c1, c2);
         }
         return svg;
     }
@@ -924,7 +996,6 @@ class UIManager {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Inicialização da Animação de Abertura
     const introOverlay = document.getElementById('intro-overlay');
     const introText = document.querySelector('.intro-text');
 
@@ -958,7 +1029,6 @@ document.addEventListener('DOMContentLoaded', () => {
         duration: 0.4
     }, "-=0.4");
 
-    // Inicialização do Core do Sistema
     const appState = new AppState();
     const confettiEngine = new ConfettiEngine('canvas-confetti');
     const uiManager = new UIManager(appState, confettiEngine);
